@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>B1ing Category</title>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "PingFang SC", "Helvetica Neue", Arial, "Microsoft Yahei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* ===== Global header: same as home.html ===== */
+    .bling-header {
+      background: #ffffff;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+    .bling-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      background-size: cover;
+      background-position: center;
+      /* TODO: replace this with your real logo image URL */
+      background-image: url("https://oldhen666.github.io/b1ing-mobile/logo-placeholder.png");
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    .bling-search-box {
+      flex: 1;
+      background: #f3f3f3;
+      border-radius: 20px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+    }
+    .bling-search-icon {
+      font-size: 16px;
+      color: #888;
+      margin-right: 6px;
+    }
+    .bling-input {
+      border: none;
+      outline: none;
+      background: transparent;
+      flex: 1;
+      font-size: 14px;
+    }
+    .bling-search-btn {
+      margin-left: 10px;
+      padding: 7px 14px;
+      border-radius: 18px;
+      background: #ff6a00;
+      color: #fff;
+      font-size: 14px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ===== Category layout ===== */
+    .cat-page {
+      height: calc(100vh - 60px); /* roughly, header height */
+      display: flex;
+      background: #f5f5f5;
+    }
+    .cat-left {
+      width: 30%;
+      max-width: 120px;
+      background: #f7f7f7;
+      border-right: 1px solid #eee;
+      overflow-y: auto;
+      padding: 6px 0;
+    }
+    .cat-main-item {
+      padding: 10px 6px 10px 10px;
+      font-size: 13px;
+      color: #444;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      display: flex;
+      align-items: center;
+    }
+    .cat-main-item span {
+      line-height: 1.3;
+    }
+    .cat-main-item.active {
+      background: #ffffff;
+      border-left-color: #ff6a00;
+      color: #ff6a00;
+      font-weight: 600;
+    }
+
+    .cat-right {
+      flex: 1;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 8px 10px 80px;
+    }
+    .cat-right-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 4px 0 8px;
+    }
+
+    .sub-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .sub-card {
+      background: #fff7f1;
+      border-radius: 12px;
+      padding: 10px 6px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .sub-img-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 4px;
+    }
+    .sub-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .sub-img-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: #ffb26b;
+    }
+    .sub-name {
+      text-align: center;
+      line-height: 1.2;
+      min-height: 2.4em;
+    }
+    .sub-all-tag {
+      font-size: 10px;
+      color: #ff6a00;
+      margin-top: 2px;
+    }
+
+    .cat-loading,
+    .cat-error {
+      font-size: 12px;
+      color: #999;
+      padding: 10px 0;
+      text-align: center;
+    }
+
+    .cat-error {
+      color: #ff4d4f;
+    }
+  </style>
+</head>
+<body>
+  <!-- Shared header -->
+  <div class="bling-header">
+    <div class="bling-logo"></div>
+    <div class="bling-search-box">
+      <span class="bling-search-icon">🔍</span>
+      <input class="bling-input" placeholder="Search categories or products…" />
+    </div>
+    <div class="bling-search-btn">Search</div>
+  </div>
+
+  <div class="cat-page">
+    <div class="cat-left" id="catMainList"></div>
+
+    <div class="cat-right" id="catRight">
+      <div id="catRightTitle" class="cat-right-title">Loading categories…</div>
+      <div id="subGrid" class="sub-grid"></div>
+      <div id="catStatus" class="cat-loading"></div>
+    </div>
+  </div>
+
+  <script>
+    // ===== CONFIG: change base URL if needed =====
+    const WP_BASE = "https://b1ing.ca"; // your WordPress + WooCommerce site
+    // Try WooCommerce Store API first (usually public & CORS-friendly)
+    const CATEGORY_API =
+      WP_BASE + "/wp-json/wc/store/v1/products/categories?per_page=100";
+
+    // If your site requires authentication for wc/v3,
+    // you can instead set:
+    // const CATEGORY_API = WP_BASE + "/wp-json/wc/v3/products/categories?per_page=100&consumer_key=XXX&consumer_secret=YYY";
+
+    const mainListEl = document.getElementById("catMainList");
+    const subGridEl = document.getElementById("subGrid");
+    const catRightTitleEl = document.getElementById("catRightTitle");
+    const catStatusEl = document.getElementById("catStatus");
+
+    const state = {
+      parents: [],
+      childrenByParent: {},
+      selectedParentId: null,
+      renderedParentCount: 0,
+      batchSize: 12, // how many main cats to render at first
+    };
+
+    function byOrderAndName(a, b) {
+      const aOrder = a.menu_order ?? a.menu_order ?? 0;
+      const bOrder = b.menu_order ?? b.menu_order ?? 0;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+      return (a.name || "").localeCompare(b.name || "");
+    }
+
+    // Render main (left) categories in batches (for long lists)
+    function renderMoreParents() {
+      const { parents, renderedParentCount, batchSize } = state;
+      if (renderedParentCount >= parents.length) return;
+
+      const end = Math.min(renderedParentCount + batchSize, parents.length);
+      for (let i = renderedParentCount; i < end; i++) {
+        const cat = parents[i];
+        const item = document.createElement("div");
+        item.className = "cat-main-item";
+        item.dataset.id = cat.id;
+        item.innerHTML = `<span>${cat.name}</span>`;
+        item.addEventListener("click", () => selectParent(cat.id));
+        mainListEl.appendChild(item);
+      }
+      state.renderedParentCount = end;
+    }
+
+    function selectParent(parentId) {
+      state.selectedParentId = parentId;
+
+      // highlight
+      const items = mainListEl.querySelectorAll(".cat-main-item");
+      items.forEach((el) => {
+        el.classList.toggle(
+          "active",
+          String(el.dataset.id) === String(parentId)
+        );
+      });
+
+      // render right side children
+      const parent = state.parents.find((p) => String(p.id) === String(parentId));
+      const children = state.childrenByParent[parentId] || [];
+
+      catRightTitleEl.textContent = parent ? parent.name : "Category";
+
+      subGridEl.innerHTML = "";
+
+      // "All" card for this parent
+      if (parent) {
+        const allCard = document.createElement("div");
+        allCard.className = "sub-card";
+        allCard.addEventListener("click", () => {
+          goToProductList(parent);
+        });
+
+        const wrap = document.createElement("div");
+        wrap.className = "sub-img-wrap";
+        const placeholder = document.createElement("div");
+        placeholder.className = "sub-img-placeholder";
+        placeholder.textContent = "⭐";
+        wrap.appendChild(placeholder);
+
+        const name = document.createElement("div");
+        name.className = "sub-name";
+        name.textContent = parent.name;
+
+        const tag = document.createElement("div");
+        tag.className = "sub-all-tag";
+        tag.textContent = "View all";
+
+        allCard.appendChild(wrap);
+        allCard.appendChild(name);
+        allCard.appendChild(tag);
+
+        subGridEl.appendChild(allCard);
+      }
+
+      // child categories
+      children.forEach((cat) => {
+        const card = document.createElement("div");
+        card.className = "sub-card";
+        card.addEventListener("click", () => goToProductList(cat));
+
+        const wrap = document.createElement("div");
+        wrap.className = "sub-img-wrap";
+
+        if (cat.image && cat.image.src) {
+          const img = document.createElement("img");
+          img.src = cat.image.src;
+          img.alt = cat.name;
+          wrap.appendChild(img);
+        } else {
+          const ph = document.createElement("div");
+          ph.className = "sub-img-placeholder";
+          ph.textContent = cat.name ? cat.name[0].toUpperCase() : "?";
+          wrap.appendChild(ph);
+        }
+
+        const name = document.createElement("div");
+        name.className = "sub-name";
+        name.textContent = cat.name;
+
+        card.appendChild(wrap);
+        card.appendChild(name);
+
+        subGridEl.appendChild(card);
+      });
+
+      if (!children.length) {
+        catStatusEl.textContent =
+          "No subcategories yet. Tap the card above to view all products.";
+      } else {
+        catStatusEl.textContent = "";
+      }
+    }
+
+    function goToProductList(cat) {
+      // Use category ID or slug as URL param
+      const url = `product_list.html?cat=${encodeURIComponent(
+        cat.id
+      )}&name=${encodeURIComponent(cat.name)}`;
+      window.location.href = url;
+    }
+
+    async function loadCategories() {
+      try {
+        catStatusEl.textContent = "Loading categories…";
+        const res = await fetch(CATEGORY_API, {
+          credentials: "omit",
+        });
+        if (!res.ok) {
+          throw new Error("HTTP " + res.status);
+        }
+        const data = await res.json();
+
+        // WooCommerce Store API uses slightly different shape vs wc/v3, but both have id/name/parent/image
+        const cats = Array.isArray(data) ? data : [];
+
+        const parents = [];
+        const childrenByParent = {};
+
+        cats.forEach((cat) => {
+          // hide "Uncategorized" etc. if you want
+          if (
+            cat.slug === "uncategorized" ||
+            cat.name === "Uncategorized" ||
+            cat.count === 0
+          ) {
+            // you can remove this "count===0" check if you want empty cats
+            return;
+          }
+          if (!cat.parent || cat.parent === 0) {
+            parents.push(cat);
+          } else {
+            if (!childrenByParent[cat.parent]) {
+              childrenByParent[cat.parent] = [];
+            }
+            childrenByParent[cat.parent].push(cat);
+          }
+        });
+
+        parents.sort(byOrderAndName);
+        Object.keys(childrenByParent).forEach((pid) => {
+          childrenByParent[pid].sort(byOrderAndName);
+        });
+
+        if (!parents.length) {
+          catStatusEl.textContent =
+            "No categories found. Please check your WooCommerce settings or API.";
+          return;
+        }
+
+        state.parents = parents;
+        state.childrenByParent = childrenByParent;
+        state.renderedParentCount = 0;
+
+        mainListEl.innerHTML = "";
+        renderMoreParents();
+
+        // default select first parent
+        selectParent(parents[0].id);
+        catStatusEl.textContent = "";
+      } catch (err) {
+        console.error(err);
+        catStatusEl.className = "cat-error";
+        catStatusEl.textContent =
+          "Failed to load categories. Please check API or CORS settings.";
+      }
+    }
+
+    // Left column "infinite" load: when scroll near bottom, render more parents
+    mainListEl.addEventListener("scroll", () => {
+      const nearBottom =
+        mainListEl.scrollTop + mainListEl.clientHeight >=
+        mainListEl.scrollHeight - 40;
+      if (nearBottom) {
+        renderMoreParents();
+      }
+    });
+
+    loadCategories();
+  </script>
+</body>
+</html>
