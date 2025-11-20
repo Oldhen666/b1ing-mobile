@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>B1ING Category</title>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      font-family: -apple-system,BlinkMacSystemFont,"PingFang SC",
+        "Helvetica Neue",Arial,"Microsoft Yahei",sans-serif;
+      background:#f5f5f5;
+      color:#333;
+    }
+    a { text-decoration:none; color:inherit; }
+
+    /* 顶部导航 */
+    .top-bar{
+      height:52px;
+      display:flex;
+      align-items:center;
+      padding:0 12px;
+      background:#ffffff;
+      border-bottom:1px solid #eee;
+    }
+    .top-menu{
+      font-size:20px;
+      margin-right:10px;
+    }
+    .top-logo{
+      font-size:20px;
+      font-weight:700;
+      flex:1;
+    }
+    .top-icons{
+      display:flex;
+      gap:12px;
+      font-size:18px;
+    }
+
+    .page-title{
+      padding:10px 14px 6px;
+      font-size:18px;
+      font-weight:600;
+    }
+
+    /* 搜索框 */
+    .search-wrap{
+      padding:0 14px 10px;
+    }
+    .search-box{
+      display:flex;
+      align-items:center;
+      background:#ffffff;
+      border-radius:18px;
+      padding:6px 10px;
+      box-shadow:0 0 0 1px #eee;
+    }
+    .search-icon{ margin-right:6px; font-size:16px; color:#999; }
+    .search-input{
+      border:none;
+      outline:none;
+      flex:1;
+      font-size:13px;
+    }
+    .search-mic{ font-size:16px; margin-left:4px; color:#ff6a00; }
+
+    /* “为你推荐” tab */
+    .tabs{
+      display:flex;
+      padding:0 14px;
+      margin-bottom:8px;
+    }
+    .tab-item{
+      padding:6px 14px;
+      font-size:13px;
+      border-radius:16px;
+      margin-right:8px;
+      background:#f2f2f2;
+      color:#666;
+    }
+    .tab-item.active{
+      background:#ffe8d8;
+      color:#ff6a00;
+    }
+
+    /* 分类文字列表（中间竖排） */
+    .cat-text-list{
+      padding:0 14px 8px;
+      font-size:13px;
+      color:#444;
+    }
+    .cat-text-list div{
+      padding:4px 0;
+    }
+
+    /* 热门类目图标 */
+    .section-title{
+      padding:6px 14px;
+      font-size:15px;
+      font-weight:600;
+    }
+    .hot-grid{
+      padding:0 10px 10px;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      grid-gap:8px;
+    }
+    .hot-item{
+      background:#ffffff;
+      border-radius:10px;
+      padding:8px 4px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      font-size:11px;
+    }
+    .hot-icon{
+      width:40px;
+      height:40px;
+      border-radius:12px;
+      background:#ffe6d6;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-bottom:4px;
+      font-size:20px;
+    }
+
+    /* 商品列表 */
+    .product-list{
+      padding:0 10px 16px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .product-card{
+      display:flex;
+      background:#ffffff;
+      border-radius:10px;
+      overflow:hidden;
+    }
+    .product-img{
+      width:90px;
+      height:90px;
+      background:#ddd;
+      flex-shrink:0;
+    }
+    .product-body{
+      flex:1;
+      padding:8px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .product-title{
+      font-size:13px;
+      line-height:1.4;
+      max-height:2.8em;
+      overflow:hidden;
+    }
+    .product-price{
+      font-size:15px;
+      color:#ff5000;
+      margin-top:4px;
+    }
+    .product-sub{
+      font-size:11px;
+      color:#999;
+      margin-top:2px;
+    }
+
+    /* 底部简单导航 */
+    .bottom-nav{
+      padding:12px 0 80px;
+      text-align:center;
+      font-size:13px;
+      color:#ff6a00;
+    }
+
+    /* 底部订阅 */
+    .footer{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      background:#ffffff;
+      border-top:1px solid #eee;
+      padding:10px 14px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .footer-logo{
+      font-size:20px;
+      font-weight:700;
+    }
+    .footer-input{
+      flex:1;
+      height:32px;
+      border-radius:16px;
+      border:1px solid #ddd;
+      padding:0 10px;
+      font-size:12px;
+    }
+    .footer-btn{
+      padding:6px 10px;
+      border-radius:16px;
+      border:none;
+      background:#000;
+      color:#fff;
+      font-size:12px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部 -->
+  <header class="top-bar">
+    <div class="top-menu">☰</div>
+    <div class="top-logo">BL1NG</div>
+    <div class="top-icons">
+      <span>🔍</span>
+      <span>🛒</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-title">Category_M</div>
+
+    <!-- 搜索 -->
+    <div class="search-wrap">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" placeholder="搜索你想要的好物" />
+        <span class="search-mic">🎤</span>
+      </div>
+    </div>
+
+    <!-- tab -->
+    <div class="tabs">
+      <div class="tab-item active">为你推荐</div>
+      <div class="tab-item">女装</div>
+      <div class="tab-item">家居</div>
+    </div>
+
+    <!-- 中间文字分类列表（和你截图类似排版） -->
+    <div class="cat-text-list">
+      <div>桌子</div>
+      <div>相片</div>
+      <div>工具</div>
+      <div>床品</div>
+      <div>室内收纳</div>
+      <div>墙面装饰</div>
+      <div>礼品</div>
+      <div>厨房</div>
+      <div>客厅</div>
+      <div>办公</div>
+      <div>更多…</div>
+    </div>
+
+    <!-- 热门类目图标 -->
+    <div class="section-title">热门类目</div>
+    <div class="hot-grid">
+      <div class="hot-item">
+        <div class="hot-icon">📦</div>
+        <div>收纳整理</div>
+      </div>
+      <div class="hot-item">
+        <div class="hot-icon">🛏️</div>
+        <div>床上用品</div>
+      </div>
+      <div class="hot-item">
+        <div class="hot-icon">🧺</div>
+        <div>洗衣分类</div>
+      </div>
+      <div class="hot-item">
+        <div class="hot-icon">⏰</div>
+        <div>家居饰品</div>
+      </div>
+      <div class="hot-item">
+        <div class="hot-icon">🎁</div>
+        <div>节日礼物</div>
+      </div>
+      <div class="hot-item">
+        <div class="hot-icon">🍽️</div>
+        <div>餐具杯子</div>
+      </div>
+      <div class="hot-item">
+        <div class="hot-icon">📚</div>
+        <div>书桌收纳</div>
+      </div>
+      <div class="hot-item">
+        <div class="hot-icon">🪑</div>
+        <div>小家具</div>
+      </div>
+    </div>
+
+    <!-- 猜你喜欢 -->
+    <div class="section-title">猜你喜欢</div>
+    <div class="product-list">
+      <div class="product-card">
+        <div class="product-img"></div>
+        <div class="product-body">
+          <div class="product-title">
+            【示例商品】客厅北欧风多层收纳柜，可放零食饮料和小物件。
+          </div>
+          <div>
+            <div class="product-price">¥118.0</div>
+            <div class="product-sub">≈CA$23.88 · 1k+ 人喜欢</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img"></div>
+        <div class="product-body">
+          <div class="product-title">
+            【示例商品】纯色水洗棉四件套，柔软亲肤适合裸睡体验。
+          </div>
+          <div>
+            <div class="product-price">¥79.8</div>
+            <div class="product-sub">≈CA$16.15 · 2k+ 人喜欢</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img"></div>
+        <div class="product-body">
+          <div class="product-title">
+            【示例商品】壁挂式小收纳架，适合玄关钥匙、信件及饰品摆放。
+          </div>
+          <div>
+            <div class="product-price">¥59.0</div>
+            <div class="product-sub">≈CA$11.90 · 800+ 人喜欢</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">⬇ 上滑查看更多分类 ⬇</div>
+  </main>
+
+  <!-- 底部订阅 -->
+  <footer class="footer">
+    <div class="footer-logo">BL1NG</div>
+    <input class="footer-input" placeholder="email" />
+    <button class="footer-btn">Subscribe</button>
+  </footer>
+</body>
+</html>
