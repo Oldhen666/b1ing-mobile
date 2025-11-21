@@ -242,6 +242,14 @@
       color: #999;
       padding: 12px 0 18px;
     }
+
+.hot-empty,
+.hot-loading {
+  font-size: 11px;
+  color: #999;
+  padding: 10px 0;
+}
+
   </style>
 </head>
 <body>
@@ -265,60 +273,11 @@
     </div>
 
     <div class="hot-strip-wrapper">
-      <div class="hot-strip">
-        <!-- 10 hot items, scroll horizontally, about 4 visible at once -->
-        <div class="hot-card">
-          <div class="hot-icon">🛋️</div>
-          <div class="hot-name">Kids Sofa</div>
-          <div class="hot-tag">Cozy corner</div>
-        </div>
-        <div class="hot-card">
-          <div class="hot-icon">⛺</div>
-          <div class="hot-name">Roof Top Tent</div>
-          <div class="hot-tag">Weekend camping</div>
-        </div>
-        <div class="hot-card">
-          <div class="hot-icon">🚶</div>
-          <div class="hot-name">Walking Pad</div>
-          <div class="hot-tag">Small-space cardio</div>
-        </div>
-        <div class="hot-card">
-          <div class="hot-icon">🫘</div>
-          <div class="hot-name">Bean Bag Chair</div>
-          <div class="hot-tag">Movie nights</div>
-        </div>
-        <div class="hot-card">
-          <div class="hot-icon">🔥</div>
-          <div class="hot-name">Outdoor Fire Pit</div>
-          <div class="hot-tag">Backyard vibes</div>
-        </div>
-        <div class="hot-card">
-          <div class="hot-icon">✨</div>
-          <div class="hot-name">LED String Lights</div>
-          <div class="hot-tag">Cozy lighting</div>
-        </div>
-        <div class="hot-card">
-          <div class="hot-icon">☕</div>
-          <div class="hot-name">Foldable Coffee Table</div>
-          <div class="hot-tag">Small living room</div>
-        </div>
-        <div class="hot-card">
-          <div class="hot-icon">📽️</div>
-          <div class="hot-name">Mini Projector</div>
-          <div class="hot-tag">Home cinema</div>
-        </div>
-        <div class="hot-card">
-          <div class="hot-icon">🎮</div>
-          <div class="hot-name">Gaming Chair</div>
-          <div class="hot-tag">Desk comfort</div>
-        </div>
-        <div class="hot-card">
-          <div class="hot-icon">📦</div>
-          <div class="hot-name">Storage Bench</div>
-          <div class="hot-tag">Entryway tidy</div>
-        </div>
-      </div>
-    </div>
+  <div class="hot-strip" id="hot-strip">
+    <!-- Hot picks will be injected by JavaScript -->
+  </div>
+</div>
+
 
     <!-- Product feed -->
     <div class="feed-section-title">Latest Products</div>
@@ -328,7 +287,92 @@
 
   <script>
     // ===== Mock product data =====
-    const baseProducts = [
+const WP_BASE = "https://b1ing.ca";     // 你的站点
+const HOT_SUFFIX = "_m_top";           // 以这个后缀结尾的分类认为是 Hot Picks
+
+// 简单根据 slug 选一个 emoji，当作分类图标
+function pickHotIcon(slug) {
+  const base = slug.replace(HOT_SUFFIX, "");
+
+  if (base.includes("sofa")) return "🛋️";
+  if (base.includes("roof") || base.includes("tent")) return "⛺";
+  if (base.includes("walk")) return "🚶";
+  if (base.includes("bean")) return "🫘";
+  if (base.includes("fire") || base.includes("pit")) return "🔥";
+  if (base.includes("light")) return "✨";
+  return "⭐"; // 默认 icon
+}
+
+// 从 WooCommerce REST API 加载以 _m_top 结尾的分类，插入到 Hot Picks
+async function loadHotPicks() {
+  const strip = document.getElementById("hot-strip");
+  if (!strip) return;
+
+  strip.innerHTML = '<div class="hot-loading">Loading…</div>';
+
+  try {
+    const res = await fetch(
+      WP_BASE + "/wp-json/wc/store/v1/products/categories?per_page=100",
+      { credentials: "include" }  // 这样带上 cookie，兼容 CORS 设置
+    );
+
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const cats = await res.json();
+
+    // 只要 slug 以 _m_top 结尾，并且有商品（count > 0）
+    let hotCats = cats.filter(
+      (c) =>
+        c.slug &&
+        c.slug.endsWith(HOT_SUFFIX) &&
+        typeof c.count === "number" &&
+        c.count > 0
+    );
+
+    // 按名称排序，方便控制顺序
+    hotCats.sort((a, b) => a.name.localeCompare(b.name));
+
+    strip.innerHTML = "";
+
+    if (!hotCats.length) {
+      strip.innerHTML =
+        '<div class="hot-empty">No hot picks yet.</div>';
+      return;
+    }
+
+    hotCats.forEach((cat) => {
+      const icon = pickHotIcon(cat.slug);
+      const tagLine =
+        (cat.description && cat.description.trim()) || "Hot pick";
+
+      const card = document.createElement("div");
+      card.className = "hot-card";
+      card.innerHTML = `
+        <div class="hot-icon">${icon}</div>
+        <div class="hot-name">${cat.name}</div>
+        <div class="hot-tag">${tagLine}</div>
+      `;
+
+      // 点击行为：目前直接跳到这个分类在网站上的页面
+      card.addEventListener("click", () => {
+        window.location.href = cat.permalink;
+        // 以后做 product_list.html 时，你可以改成：
+        // window.location.href = "product_list.html?cat=" + encodeURIComponent(cat.slug);
+      });
+
+      strip.appendChild(card);
+    });
+  } catch (e) {
+    console.error("Hot picks load error", e);
+    strip.innerHTML =
+      '<div class="hot-empty">Failed to load hot picks.</div>';
+  }
+}
+    
+
+
+
+
+const baseProducts = [
       {
         name: "Cloudy Kids Sofa – soft mini couch for reading corner",
         price: 119.0,
@@ -576,6 +620,7 @@
 
     // Initial render
     renderMore();
+loadHotPicks();   // 加载 Hot Picks
   </script>
 </body>
 </html>
