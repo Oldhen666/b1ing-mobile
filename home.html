@@ -372,88 +372,59 @@ async function loadHotPicks() {
 
 
 
-const baseProducts = [
-      {
-        name: "Cloudy Kids Sofa – soft mini couch for reading corner",
-        price: 119.0,
-        emoji: "🛋️",
-        tag: "New",
-        rating: 4.9,
-        reviews: 42,
-      },
-      {
-        name: "Roof Top Tent for SUV – 4-season camping ready",
-        price: 899.0,
-        emoji: "⛺",
-        tag: "Hot",
-        rating: 4.7,
-        reviews: 31,
-      },
-      {
-        name: "Ultra-Slim Walking Pad – under desk treadmill",
-        price: 329.0,
-        emoji: "🚶",
-        tag: "Trending",
-        rating: 4.6,
-        reviews: 58,
-      },
-      {
-        name: "Lazy Bean Bag Chair – oversized lounge seat",
-        price: 189.0,
-        emoji: "🫘",
-        tag: "Cozy",
-        rating: 4.8,
-        reviews: 75,
-      },
-      {
-        name: "Outdoor Fire Pit Stove – portable patio heater",
-        price: 169.0,
-        emoji: "🔥",
-        tag: "Backyard",
-        rating: 4.5,
-        reviews: 22,
-      },
-      {
-        name: "LED String Lights – warm white 10m set",
-        price: 24.9,
-        emoji: "✨",
-        tag: "Decor",
-        rating: 4.9,
-        reviews: 133,
-      },
-      {
-        name: "Foldable Coffee Table – storage + lift top",
-        price: 149.0,
-        emoji: "☕",
-        tag: "Smart",
-        rating: 4.4,
-        reviews: 19,
-      },
-      {
-        name: "Mini Projector – 1080p home cinema pocket size",
-        price: 259.0,
-        emoji: "📽️",
-        tag: "Popular",
-        rating: 4.6,
-        reviews: 54,
-      },
-      {
-        name: "Ergonomic Gaming Chair – lumbar support",
-        price: 279.0,
-        emoji: "🎮",
-        tag: "Desk setup",
-        rating: 4.5,
-        reviews: 38,
-      },
-      {
-        name: "Storage Bench with cushion – entryway shoe box",
-        price: 139.0,
-        emoji: "📦",
-        tag: "Entryway",
-        rating: 4.7,
-        reviews: 27,
-      },
-    ];
+const apiBase = "https://b1ing.ca/wp-json/wc/store/v1";
+
+// 获取分类列表 → 找到所有 slug 结尾带 _m 的分类
+async function loadMobileCategories() {
+  const res = await fetch(`${apiBase}/products/categories?per_page=100`);
+  const cats = await res.json();
+  return cats.filter(c => c.slug.endsWith("_m") || c.slug.includes("_m_"));
+}
+
+// 根据分类 ID 获取产品
+async function loadProductsByCategories(categoryIds) {
+  const url = `${apiBase}/products?per_page=50&category=${categoryIds.join(",")}`;
+  const res = await fetch(url);
+  return await res.json();
+}
+
+// 转换产品 → 适配你的 createCard() UI
+function mapProductToCard(p) {
+  return {
+    name: p.name,
+    price: p.prices.price / 100,   // WooCommerce price unit = cents
+    emoji: "🛒",                   // 你以后可改成产品缩略图
+    tag: "New",
+    rating: 4.8,
+    reviews: p.rating_count,
+    image: p.images?.[0]?.src ?? "",
+    permalink: p.permalink
+  };
+}
+
+// 初始化 Latest Products 区
+async function initFeed() {
+  const mobileCats = await loadMobileCategories();
+  const mobileCatIds = mobileCats.map(c => c.id);
+
+  const products = await loadProductsByCategories(mobileCatIds);
+
+  // 转换数据格式
+  feedData = products.map(mapProductToCard);
+
+  // 随机排序
+  feedData.sort(() => Math.random() - 0.5);
+
+  // 重绘 feed
+  feedGrid.innerHTML = "";
+  loadedCount = 0;
+  renderMore();
+}
+
+// ====== Infinite scroll 原本功能保持不变 ======
+
+// 在窗口加载后启动
+window.onload = initFeed;
 
     // Pre-generate many "posted items" (simulating publish time)
     const feedData = [];
