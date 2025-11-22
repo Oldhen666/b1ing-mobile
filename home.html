@@ -1,597 +1,148 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>B1ing Home</title>
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "PingFang SC", "Helvetica Neue", Arial, "Microsoft Yahei", sans-serif;
-      background: #f5f5f5;
-      color: #333;
-    }
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
+<script>
+const WP_BASE = "https://b1ing.ca";
+const HOT_SUFFIX = "_m_top";
+const apiBase = WP_BASE + "/wp-json/wc/store/v1";
 
-    /* ===== Global header: logo + search ===== */
-    .bling-header {
-      background: #ffffff;
-      padding: 10px 12px;
-      display: flex;
-      align-items: center;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-      position: sticky;
-      top: 0;
-      z-index: 999;
-    }
-    .bling-logo {
-      width: 34px;
-      height: 34px;
-      border-radius: 6px;
-      background-size: cover;
-      background-position: center;
-      /* TODO: replace this with your real logo image URL */
-      background-image: url("https://oldhen666.github.io/b1ing-mobile/logo-placeholder.png");
-      margin-right: 10px;
-      flex-shrink: 0;
-    }
-    .bling-search-box {
-      flex: 1;
-      background: #f3f3f3;
-      border-radius: 20px;
-      padding: 6px 10px;
-      display: flex;
-      align-items: center;
-    }
-    .bling-search-icon {
-      font-size: 16px;
-      color: #888;
-      margin-right: 6px;
-    }
-    .bling-input {
-      border: none;
-      outline: none;
-      background: transparent;
-      flex: 1;
-      font-size: 14px;
-    }
-    .bling-search-btn {
-      margin-left: 10px;
-      padding: 7px 14px;
-      border-radius: 18px;
-      background: #ff6a00;
-      color: #fff;
-      font-size: 14px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    /* ===== Page layout ===== */
-    .page {
-      padding: 8px 10px 90px;
-    }
-
-    .section-header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      margin: 10px 0 6px;
-    }
-    .section-title {
-      font-size: 16px;
-      font-weight: 600;
-    }
-    .section-sub {
-      font-size: 11px;
-      color: #999;
-    }
-
-    /* ===== Hot Picks horizontal scroll ===== */
-    .hot-strip-wrapper {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    .hot-strip {
-      display: flex;
-      gap: 10px;
-      padding-bottom: 4px;
-      min-width: 100%;
-    }
-    .hot-card {
-      min-width: 23%; /* roughly 4 items visible on phone */
-      max-width: 26%;
-      background: #fff7f1;
-      border-radius: 12px;
-      padding: 8px 6px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-size: 11px;
-      flex-shrink: 0;
-    }
-    .hot-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      background: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      margin-bottom: 4px;
-    }
-    .hot-name {
-      font-weight: 500;
-      text-align: center;
-    }
-    .hot-tag {
-      margin-top: 2px;
-      font-size: 10px;
-      color: #ff6a00;
-    }
-
-    /* ===== Product feed (2-column masonry-like grid) ===== */
-    .feed-section-title {
-      margin: 14px 0 6px;
-      font-size: 16px;
-      font-weight: 600;
-    }
-    .feed-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-    }
-    .product-card {
-      background: #fff;
-      border-radius: 12px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      font-size: 11px;
-    }
-    .product-img {
-      width: 100%;
-      padding-top: 100%; /* square */
-      background: #eee;
-      position: relative;
-      overflow: hidden;
-    }
-    .product-img span {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-    }
-    .product-body {
-      padding: 6px 7px 7px;
-    }
-    .product-name {
-      font-size: 12px;
-      line-height: 1.3;
-      height: 2.6em;
-      overflow: hidden;
-      margin-bottom: 4px;
-    }
-    .product-price-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 2px;
-    }
-    .product-price {
-      font-size: 13px;
-      color: #ff5000;
-      font-weight: 600;
-    }
-    .product-tag {
-      font-size: 10px;
-      color: #ff6a00;
-      padding: 1px 4px;
-      border-radius: 8px;
-      border: 1px solid #ffbf80;
-    }
-    .product-meta {
-      font-size: 10px;
-      color: #999;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .product-rating {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-    }
-    .product-time {
-      font-size: 10px;
-    }
-
-    /* ===== Pull to refresh indicator ===== */
-    .pull-indicator {
-      position: fixed;
-      top: -40px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #333;
-      color: #fff;
-      padding: 6px 12px;
-      border-radius: 16px;
-      font-size: 11px;
-      opacity: 0;
-      transition: top 0.2s ease, opacity 0.2s ease;
-      z-index: 1000;
-    }
-    .pull-indicator.visible {
-      top: 10px;
-      opacity: 1;
-    }
-    .feed-loading {
-      text-align: center;
-      font-size: 11px;
-      color: #999;
-      padding: 12px 0 18px;
-    }
-
-.hot-empty,
-.hot-loading {
-  font-size: 11px;
-  color: #999;
-  padding: 10px 0;
-}
-
-  </style>
-</head>
-<body>
-  <!-- Global header: same style can be reused on all pages -->
-  <div class="bling-header">
-    <div class="bling-logo"></div>
-    <div class="bling-search-box">
-      <span class="bling-search-icon">🔍</span>
-      <input class="bling-input" placeholder="Search products…" />
-    </div>
-    <div class="bling-search-btn">Search</div>
-  </div>
-
-  <div class="pull-indicator" id="pullIndicator">Release to refresh</div>
-
-  <div class="page">
-    <!-- Hot Picks -->
-    <div class="section-header">
-      <div class="section-title">Hot Picks</div>
-      <div class="section-sub">Trending now for Canadian homes</div>
-    </div>
-
-    <div class="hot-strip-wrapper">
-  <div class="hot-strip" id="hot-strip">
-    <!-- Hot picks will be injected by JavaScript -->
-  </div>
-</div>
-
-
-    <!-- Product feed -->
-    <div class="feed-section-title">Latest Products</div>
-    <div id="feedGrid" class="feed-grid"></div>
-    <div id="feedLoading" class="feed-loading">Loading…</div>
-  </div>
-
-  <script>
-    // ===== Mock product data =====
-const WP_BASE = "https://b1ing.ca";     // 你的站点
-const HOT_SUFFIX = "_m_top";           // 以这个后缀结尾的分类认为是 Hot Picks
-
-// 简单根据 slug 选一个 emoji，当作分类图标
+// ===== Hot Picks =====
 function pickHotIcon(slug) {
   const base = slug.replace(HOT_SUFFIX, "");
-
   if (base.includes("sofa")) return "🛋️";
   if (base.includes("roof") || base.includes("tent")) return "⛺";
   if (base.includes("walk")) return "🚶";
   if (base.includes("bean")) return "🫘";
-  if (base.includes("fire") || base.includes("pit")) return "🔥";
-  if (base.includes("light")) return "✨";
-  return "⭐"; // 默认 icon
+  return "⭐";
 }
 
-// 从 WooCommerce REST API 加载以 _m_top 结尾的分类，插入到 Hot Picks
 async function loadHotPicks() {
   const strip = document.getElementById("hot-strip");
-  if (!strip) return;
-
   strip.innerHTML = '<div class="hot-loading">Loading…</div>';
 
   try {
-    const res = await fetch(
-      WP_BASE + "/wp-json/wc/store/v1/products/categories?per_page=100",
-      { credentials: "include" }  // 这样带上 cookie，兼容 CORS 设置
+    const res = await fetch(`${apiBase}/products/categories?per_page=100`,
+      { credentials: "include" }
     );
-
-    if (!res.ok) throw new Error("HTTP " + res.status);
     const cats = await res.json();
 
-    // 只要 slug 以 _m_top 结尾，并且有商品（count > 0）
-    let hotCats = cats.filter(
-      (c) =>
-        c.slug &&
-        c.slug.endsWith(HOT_SUFFIX) &&
-        typeof c.count === "number" &&
-        c.count > 0
-    );
-
-    // 按名称排序，方便控制顺序
-    hotCats.sort((a, b) => a.name.localeCompare(b.name));
-
+    const hotCats = cats.filter(c => c.slug.endsWith(HOT_SUFFIX) && c.count > 0);
     strip.innerHTML = "";
 
     if (!hotCats.length) {
-      strip.innerHTML =
-        '<div class="hot-empty">No hot picks yet.</div>';
+      strip.innerHTML = '<div class="hot-empty">No hot picks yet.</div>';
       return;
     }
 
-    hotCats.forEach((cat) => {
+    hotCats.forEach(cat => {
       const icon = pickHotIcon(cat.slug);
-      const tagLine =
-        (cat.description && cat.description.trim()) || "Hot pick";
+      const tag = cat.description || "Hot pick";
 
       const card = document.createElement("div");
       card.className = "hot-card";
       card.innerHTML = `
         <div class="hot-icon">${icon}</div>
         <div class="hot-name">${cat.name}</div>
-        <div class="hot-tag">${tagLine}</div>
+        <div class="hot-tag">${tag}</div>
       `;
-
-      // 点击行为：目前直接跳到这个分类在网站上的页面
-      card.addEventListener("click", () => {
-        window.location.href = cat.permalink;
-        // 以后做 product_list.html 时，你可以改成：
-        // window.location.href = "product_list.html?cat=" + encodeURIComponent(cat.slug);
-      });
-
+      card.onclick = () => window.location.href = cat.permalink;
       strip.appendChild(card);
     });
+
   } catch (e) {
-    console.error("Hot picks load error", e);
-    strip.innerHTML =
-      '<div class="hot-empty">Failed to load hot picks.</div>';
+    console.error(e);
+    strip.innerHTML = '<div class="hot-empty">Failed to load hot picks.</div>';
   }
 }
-    
 
-
-
-
-const apiBase = "https://b1ing.ca/wp-json/wc/store/v1";
-
-// 获取分类列表 → 找到所有 slug 结尾带 _m 的分类
+// ===== Latest Products =====
 async function loadMobileCategories() {
   const res = await fetch(`${apiBase}/products/categories?per_page=100`);
   const cats = await res.json();
   return cats.filter(c => c.slug.endsWith("_m") || c.slug.includes("_m_"));
 }
 
-// 根据分类 ID 获取产品
-async function loadProductsByCategories(categoryIds) {
-  const url = `${apiBase}/products?per_page=50&category=${categoryIds.join(",")}`;
+async function loadProductsByCategories(ids) {
+  const url = `${apiBase}/products?per_page=50&category=${ids.join(",")}`;
   const res = await fetch(url);
-  return await res.json();
+  return res.json();
 }
 
-// 转换产品 → 适配你的 createCard() UI
 function mapProductToCard(p) {
   return {
     name: p.name,
-    price: p.prices.price / 100,   // WooCommerce price unit = cents
-    emoji: "🛒",                   // 你以后可改成产品缩略图
-    tag: "New",
-    rating: 4.8,
-    reviews: p.rating_count,
+    price: p.prices.price / 100,
+    emoji: "🛒",
     image: p.images?.[0]?.src ?? "",
+    rating: p.average_rating || 4.7,
+    reviews: p.rating_count || 0,
     permalink: p.permalink
   };
 }
 
-// 初始化 Latest Products 区
+let feedData = [];
+let loadedCount = 0;
+const pageSize = 10;
+const feedGrid = document.getElementById("feedGrid");
+const feedLoading = document.getElementById("feedLoading");
+
+function createCard(item) {
+  const card = document.createElement("div");
+  card.className = "product-card";
+
+  card.innerHTML = `
+    <div class="product-img"><span>${item.emoji}</span></div>
+    <div class="product-body">
+      <div class="product-name">${item.name}</div>
+      <div class="product-price-row">
+        <div class="product-price">CA$ ${item.price.toFixed(2)}</div>
+        <div class="product-tag">New</div>
+      </div>
+      <div class="product-meta">
+        <div class="product-rating">⭐ ${item.rating} · ${item.reviews} reviews</div>
+        <div class="product-time">New</div>
+      </div>
+    </div>
+  `;
+
+  card.onclick = () => window.location.href = item.permalink;
+
+  return card;
+}
+
+function renderMore() {
+  const end = Math.min(loadedCount + pageSize, feedData.length);
+  for (let i = loadedCount; i < end; i++) {
+    feedGrid.appendChild(createCard(feedData[i]));
+  }
+  loadedCount = end;
+
+  feedLoading.textContent =
+    loadedCount >= feedData.length ? "You reached the end" : "Scroll to load more";
+}
+
 async function initFeed() {
-  const mobileCats = await loadMobileCategories();
-  const mobileCatIds = mobileCats.map(c => c.id);
+  feedLoading.textContent = "Loading…";
 
-  const products = await loadProductsByCategories(mobileCatIds);
+  const cats = await loadMobileCategories();
+  const ids = cats.map(c => c.id);
+  const products = await loadProductsByCategories(ids);
 
-  // 转换数据格式
   feedData = products.map(mapProductToCard);
-
-  // 随机排序
   feedData.sort(() => Math.random() - 0.5);
 
-  // 重绘 feed
   feedGrid.innerHTML = "";
   loadedCount = 0;
   renderMore();
 }
 
-// ====== Infinite scroll 原本功能保持不变 ======
-
-// 在窗口加载后启动
-window.onload = initFeed;
-
-    // Pre-generate many "posted items" (simulating publish time)
-    const feedData = [];
-    const now = Date.now();
-    for (let i = 0; i < 80; i++) {
-      const base = baseProducts[i % baseProducts.length];
-      feedData.push({
-        ...base,
-        id: i + 1,
-        // newer items have smaller "hoursAgo"
-        hoursAgo: i + 1,
-      });
-    }
-    // Sort by "publish time" (newer first)
-    feedData.sort((a, b) => a.hoursAgo - b.hoursAgo);
-
-    const feedGrid = document.getElementById("feedGrid");
-    const feedLoading = document.getElementById("feedLoading");
-    const pullIndicator = document.getElementById("pullIndicator");
-
-    let pageSize = 10;
-    let loadedCount = 0;
-    let isLoading = false;
-
-    function formatTime(hoursAgo) {
-      if (hoursAgo < 1) return "Just now";
-      if (hoursAgo < 24) return `${hoursAgo}h ago`;
-      const days = Math.round(hoursAgo / 24);
-      return `${days}d ago`;
-    }
-
-    function createCard(item) {
-      const card = document.createElement("div");
-      card.className = "product-card";
-
-      const img = document.createElement("div");
-      img.className = "product-img";
-      const span = document.createElement("span");
-      span.textContent = item.emoji || "🧺";
-      img.appendChild(span);
-
-      const body = document.createElement("div");
-      body.className = "product-body";
-
-      const name = document.createElement("div");
-      name.className = "product-name";
-      name.textContent = item.name;
-
-      const priceRow = document.createElement("div");
-      priceRow.className = "product-price-row";
-
-      const price = document.createElement("div");
-      price.className = "product-price";
-      price.textContent = `CA$ ${item.price.toFixed(2)}`;
-
-      const tag = document.createElement("div");
-      tag.className = "product-tag";
-      tag.textContent = item.tag;
-
-      priceRow.appendChild(price);
-      priceRow.appendChild(tag);
-
-      const meta = document.createElement("div");
-      meta.className = "product-meta";
-
-      const rating = document.createElement("div");
-      rating.className = "product-rating";
-      rating.innerHTML = `⭐ ${item.rating.toFixed(1)} · ${item.reviews} reviews`;
-
-      const time = document.createElement("div");
-      time.className = "product-time";
-      time.textContent = formatTime(item.hoursAgo);
-
-      meta.appendChild(rating);
-      meta.appendChild(time);
-
-      body.appendChild(name);
-      body.appendChild(priceRow);
-      body.appendChild(meta);
-
-      card.appendChild(img);
-      card.appendChild(body);
-
-      return card;
-    }
-
-    function renderMore() {
-      if (isLoading) return;
-      if (loadedCount >= feedData.length) {
-        feedLoading.textContent = "No more products";
-        return;
-      }
-      isLoading = true;
-      feedLoading.textContent = "Loading…";
-
-      // Simulate loading delay
-      setTimeout(() => {
-        const end = Math.min(loadedCount + pageSize, feedData.length);
-        for (let i = loadedCount; i < end; i++) {
-          const item = feedData[i];
-          feedGrid.appendChild(createCard(item));
-        }
-        loadedCount = end;
-        isLoading = false;
-        if (loadedCount >= feedData.length) {
-          feedLoading.textContent = "You reached the end";
-        } else {
-          feedLoading.textContent = "Scroll to load more";
-        }
-      }, 250);
-    }
-
-    // Infinite scroll
-    window.addEventListener("scroll", () => {
-      const scrollBottom =
-        window.innerHeight + window.scrollY >=
-        document.body.offsetHeight - 300;
-      if (scrollBottom) {
-        renderMore();
-      }
-    });
-
-    // Pull to refresh (shuffle feed order randomly)
-    let startY = 0;
-    let pulling = false;
-    let pullDistance = 0;
-    const threshold = 70;
-
-    window.addEventListener("touchstart", (e) => {
-      if (window.scrollY === 0) {
-        pulling = true;
-        startY = e.touches[0].clientY;
-        pullDistance = 0;
-      }
-    });
-
-    window.addEventListener("touchmove", (e) => {
-      if (!pulling) return;
-      const currentY = e.touches[0].clientY;
-      pullDistance = currentY - startY;
-      if (pullDistance > 20) {
-        pullIndicator.textContent =
-          pullDistance > threshold ? "Release to refresh" : "Pull to refresh";
-        pullIndicator.classList.add("visible");
-      }
-    });
-
-    window.addEventListener("touchend", () => {
-      if (!pulling) return;
-      pulling = false;
-      if (pullDistance > threshold) {
-        // Shuffle feed data
-        for (let i = feedData.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [feedData[i], feedData[j]] = [feedData[j], feedData[i]];
-        }
-        // Re-render
-        feedGrid.innerHTML = "";
-        loadedCount = 0;
-        renderMore();
-      }
-      pullIndicator.classList.remove("visible");
-    });
-
-    // Initial render
+// Infinite scroll
+window.addEventListener("scroll", () => {
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
     renderMore();
-loadHotPicks();   // 加载 Hot Picks
-  </script>
-</body>
-</html>
+  }
+});
+
+// Init all
+window.onload = () => {
+  loadHotPicks();
+  initFeed();
+};
+</script>
