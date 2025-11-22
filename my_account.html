@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>My Account - B1ing</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial;
+      background: #f7f7f7;
+      color: #222;
+    }
+
+    .page {
+      max-width: 480px;
+      margin: 0 auto;
+      padding-bottom: 40px;
+    }
+
+    /* 顶部标题 */
+    .header {
+      padding: 18px 16px 10px;
+      background: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .header-sub {
+      font-size: 13px;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    /* 用户信息卡片 */
+    .profile-card {
+      margin: 12px 16px;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 14px 14px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: linear-gradient(135deg,#ff8a00,#ff3d81);
+      color: #fff;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .profile-main {
+      flex: 1;
+    }
+    .profile-name {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .profile-email {
+      font-size: 13px;
+      color: #888;
+      margin-top: 4px;
+    }
+    .profile-edit {
+      font-size: 12px;
+      color: #ff5500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* 小统计条（收藏 / 购物车 / 优惠券） */
+    .stats-row {
+      display: flex;
+      margin: 0 16px 8px;
+      gap: 8px;
+    }
+    .stat-pill {
+      flex: 1;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 10px 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .stat-label {
+      color: #999;
+      margin-bottom: 4px;
+    }
+    .stat-value {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    /* 区块标题 */
+    .section-title {
+      margin: 14px 16px 6px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #555;
+    }
+
+    /* 菜单列表 */
+    .menu-group {
+      margin: 0 16px 8px;
+      background: #ffffff;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 14px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .menu-item + .menu-item {
+      border-top: 1px solid #f0f0f0;
+    }
+    .menu-icon {
+      width: 26px;
+      text-align: center;
+      font-size: 17px;
+      margin-right: 10px;
+    }
+    .menu-text-main {
+      flex: 1;
+    }
+    .menu-text-sub {
+      font-size: 12px;
+      color: #999;
+      margin-top: 2px;
+    }
+    .menu-arrow {
+      font-size: 16px;
+      color: #bbb;
+      margin-left: 6px;
+    }
+
+    /* Logout */
+    .logout-btn {
+      margin: 14px 16px;
+      padding: 12px 0;
+      text-align: center;
+      background: #fff1f1;
+      color: #e64545;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- header -->
+  <div class="header">
+    <div class="header-title">My Account</div>
+    <div class="header-sub">Manage your profile, orders and favorites</div>
+  </div>
+
+  <!-- profile -->
+  <div class="profile-card">
+    <div class="avatar" id="avatar-initial">B</div>
+    <div class="profile-main">
+      <div class="profile-name" id="profile-name">Guest</div>
+      <div class="profile-email" id="profile-email">Tap to login on website</div>
+    </div>
+    <div class="profile-edit" onclick="openProfile()">
+      Edit &nbsp;›
+    </div>
+  </div>
+
+  <!-- quick stats -->
+  <div class="stats-row">
+    <div class="stat-pill" onclick="openFavorites()">
+      <div class="stat-label">Favorites</div>
+      <div class="stat-value" id="stat-fav">0</div>
+    </div>
+    <div class="stat-pill" onclick="openCart()">
+      <div class="stat-label">My Cart</div>
+      <div class="stat-value" id="stat-cart">0</div>
+    </div>
+    <div class="stat-pill" onclick="openCoupons()">
+      <div class="stat-label">Coupons</div>
+      <div class="stat-value" id="stat-coupon">0</div>
+    </div>
+  </div>
+
+  <!-- orders -->
+  <div class="section-title">My Orders</div>
+  <div class="menu-group">
+    <div class="menu-item" onclick="openOrders('all')">
+      <div class="menu-icon">📦</div>
+      <div class="menu-text-main">
+        All Orders
+        <div class="menu-text-sub">View your full order history</div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="openOrders('processing')">
+      <div class="menu-icon">🧵</div>
+      <div class="menu-text-main">
+        Processing / In production
+        <div class="menu-text-sub">Custom & personalized items in progress</div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="openOrders('shipped')">
+      <div class="menu-icon">🚚</div>
+      <div class="menu-text-main">
+        Shipped
+        <div class="menu-text-sub">Track your shipped parcels</div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="openOrders('completed')">
+      <div class="menu-icon">✅</div>
+      <div class="menu-text-main">
+        Completed
+        <div class="menu-text-sub">Past orders & re-order options</div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+  </div>
+
+  <!-- favorites & cart & address etc. -->
+  <div class="section-title">My Stuff</div>
+  <div class="menu-group">
+    <div class="menu-item" onclick="openFavorites()">
+      <div class="menu-icon">❤️</div>
+      <div class="menu-text-main">
+        My Favorites
+        <div class="menu-text-sub">Your saved sofas, tents, gifts & more</div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="openCart()">
+      <div class="menu-icon">🛒</div>
+      <div class="menu-text-main">
+        My Cart
+        <div class="menu-text-sub">Review and checkout your items</div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="openCoupons()">
+      <div class="menu-icon">🎟️</div>
+      <div class="menu-text-main">
+        My Coupons
+        <div class="menu-text-sub">Promo codes & discounts</div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="openAddresses()">
+      <div class="menu-icon">🏠</div>
+      <div class="menu-text-main">
+        My Addresses
+        <div class="menu-text-sub">Shipping & billing addresses</div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+  </div>
+
+  <!-- tracking & settings -->
+  <div class="section-title">More</div>
+  <div class="menu-group">
+    <div class="menu-item" onclick="openTracking()">
+      <div class="menu-icon">🔍</div>
+      <div class="menu-text-main">
+        Order Tracking
+        <div class="menu-text-sub">Check parcel delivery status</div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item" onclick="openSettings()">
+      <div class="menu-icon">⚙️</div>
+      <div class="menu-text-main">
+        Settings
+        <div class="menu-text-sub">Language, appearance and notifications</div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+  </div>
+
+  <!-- logout -->
+  <div class="logout-btn" onclick="logoutAccount()">
+    Log out
+  </div>
+
+</div>
+
+<script>
+  // ======= 简单从 localStorage 读收藏数量（和 home.html 同一套 favorites 机制） =======
+  function loadStats() {
+    // Favorites
+    try {
+      const fav = JSON.parse(localStorage.getItem("favorites") || "[]");
+      document.getElementById("stat-fav").textContent = fav.length;
+    } catch(e) {
+      document.getElementById("stat-fav").textContent = "0";
+    }
+
+    // Cart （先用占位；未来你接 WooCommerce cart token 后再改）
+    const cartCount = Number(localStorage.getItem("cart_count") || "0");
+    document.getElementById("stat-cart").textContent = cartCount;
+
+    // Coupons 占位（未来接 WooCommerce coupon API）
+    const couponCount = Number(localStorage.getItem("coupon_count") || "0");
+    document.getElementById("stat-coupon").textContent = couponCount;
+  }
+
+  // ======= Profile 占位：如果以后你在 WebView 中传入用户名，可以从 localStorage 或 URL 参数恢复 =======
+  function loadProfile() {
+    const name = localStorage.getItem("user_name") || "Guest";
+    const email = localStorage.getItem("user_email") || "";
+    document.getElementById("profile-name").textContent = name;
+    document.getElementById("avatar-initial").textContent = name.charAt(0).toUpperCase() || "B";
+    document.getElementById("profile-email").textContent =
+      email ? email : "Tap to login on website";
+  }
+
+  // ======= 跳转函数：先用 GitHub Pages 的 HTML 作为目标 =======
+  function openProfile() {
+    // 将来可以跳到你的 WordPress /my-account/ 页面或 profile.html
+    window.location.href = "https://b1ing.ca/my-account/";
+  }
+
+  function openOrders(status) {
+    // 预留：将来可以做 orders.html?status=processing 这种
+    window.location.href = "orders.html?status=" + encodeURIComponent(status);
+  }
+
+  function openFavorites() {
+    window.location.href = "favorites.html";
+  }
+
+  function openCart() {
+    // 可以直接跳 WooCommerce 购物车页，或者 cart.html WebView
+    window.location.href = "https://b1ing.ca/cart/";
+  }
+
+  function openCoupons() {
+    window.location.href = "coupons.html";
+  }
+
+  function openAddresses() {
+    window.location.href = "addresses.html";
+  }
+
+  function openTracking() {
+    window.location.href = "tracking.html";
+  }
+
+  function openSettings() {
+    window.location.href = "settings.html";
+  }
+
+  function logoutAccount() {
+    // 简单版本：清理本地用户信息，跳回首页或登录页
+    localStorage.removeItem("user_name");
+    localStorage.removeItem("user_email");
+    alert("You have been logged out on this device.");
+    loadProfile();
+  }
+
+  window.onload = function () {
+    loadProfile();
+    loadStats();
+  };
+</script>
+</body>
+</html>
