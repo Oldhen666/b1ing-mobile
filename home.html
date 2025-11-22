@@ -1,148 +1,202 @@
-<script>
-const WP_BASE = "https://b1ing.ca";
-const HOT_SUFFIX = "_m_top";
-const apiBase = WP_BASE + "/wp-json/wc/store/v1";
+<!-- Home Flagship Version: Full Implementation -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>B1ing Mobile Home</title>
 
-// ===== Hot Picks =====
-function pickHotIcon(slug) {
-  const base = slug.replace(HOT_SUFFIX, "");
-  if (base.includes("sofa")) return "🛋️";
-  if (base.includes("roof") || base.includes("tent")) return "⛺";
-  if (base.includes("walk")) return "🚶";
-  if (base.includes("bean")) return "🫘";
+  <style>
+    body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial; background:#f7f7f7; }
+
+    /* Section title */
+    .section-title { font-size:18px; font-weight:700; margin:18px 16px 12px; }
+
+    /* HOT PICKS */
+    #hot-picks { display:flex; overflow-x:auto; gap:12px; padding:0 16px; }
+    #hot-picks::-webkit-scrollbar { display:none; }
+    .hot-item {
+      background:white; border-radius:14px; padding:16px 10px;
+      width:110px; flex-shrink:0; text-align:center;
+      box-shadow:0 2px 6px rgba(0,0,0,0.12); cursor:pointer;
+      transition: transform .15s;
+    }
+    .hot-item:active { transform: scale(0.96); }
+    .hot-item-icon { font-size:36px; }
+    .hot-item-label { font-size:13px; margin-top:6px; font-weight:600; }
+
+    /* WATERFALL GRID */
+    #latest-products { column-count:2; column-gap:12px; padding:0 12px 40px; }
+    .prod-card {
+      break-inside: avoid; background:white; border-radius:12px; margin-bottom:12px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.10); overflow:hidden;
+      transition: transform .17s;
+    }
+    .prod-card:active { transform: scale(0.97); }
+    .prod-img { width:100%; border-radius:12px 12px 0 0; }
+    .prod-body { padding:10px 10px 14px; }
+    .prod-title { font-size:14px; font-weight:600; line-height:18px; height:36px; overflow:hidden; }
+    .prod-price { font-size:16px; font-weight:700; color:#ff5500; margin-top:6px; }
+
+    /* Skeleton */
+    .skeleton { background:#e6e6e6; border-radius:10px; animation:pulse 1.3s infinite; }
+    @keyframes pulse { 0%{opacity:1;} 50%{opacity:.45;} 100%{opacity:1;} }
+    .sk-hot { width:110px; height:110px; margin-right:12px; }
+    .sk-prod { height:220px; margin-bottom:12px; }
+  </style>
+</head>
+<body>
+
+<!-- Hot Picks -->
+<div class="section-title">Hot Picks</div>
+<div id="hot-picks"></div>
+
+<!-- Latest Products -->
+<div class="section-title">Latest Products</div>
+<div id="latest-products"></div>
+
+<script>
+const API = "https://b1ing.ca/wp-json/wc/store/v1";
+const HOT_SUFFIX = "_m_top";
+const MOBILE_SUFFIX = "_m";
+const CACHE_KEY = "b1ing_mobile_products_v1";
+const CACHE_TTL = 1000 * 60 * 10; // 10 minutes
+
+function pickIcon(slug){
+  const s = slug.replace(HOT_SUFFIX, "").replace(MOBILE_SUFFIX, "");
+  if (s.includes("sofa")) return "🛋️";
+  if (s.includes("tent") || s.includes("roof")) return "⛺";
+  if (s.includes("walk")) return "🚶";
+  if (s.includes("bean")) return "🫘";
   return "⭐";
 }
 
-async function loadHotPicks() {
-  const strip = document.getElementById("hot-strip");
-  strip.innerHTML = '<div class="hot-loading">Loading…</div>';
+async function fetchJSON(url){ const res = await fetch(url,{credentials:"include"}); return res.json(); }
+async function getCategories(){ return fetchJSON(`${API}/products/categories?per_page=100`); }
+async function getProductsByCat(ids){ if(!ids.length) return []; const q=ids.map(id=>`category=${id}`).join('&'); return fetchJSON(`${API}/products?per_page=50&${q}`); }
 
-  try {
-    const res = await fetch(`${apiBase}/products/categories?per_page=100`,
-      { credentials: "include" }
-    );
-    const cats = await res.json();
+function renderHotPicks(list){
+  const box=document.getElementById("hot-picks"); box.innerHTML="";
+  list.forEach(cat=>{
+    const div=document.createElement("div"); div.className="hot-item";
+    div.innerHTML=`<div class='hot-item-icon'>${pickIcon(cat.slug)}</div><div class='hot-item-label'>${cat.name}</div>`;
+    div.onclick=()=>window.location.href=cat.permalink;
+    box.appendChild(div);
+  });
+}
 
-    const hotCats = cats.filter(c => c.slug.endsWith(HOT_SUFFIX) && c.count > 0);
-    strip.innerHTML = "";
+function renderProducts(list){
+  const box=document.getElementById("latest-products"); box.innerHTML="";
+  list.forEach(p=>{
+    const card=document.createElement("div"); card.className="prod-card";
+    card.onclick=()=>window.location.href=p.permalink;
+    const img=p.images?.[0]?.src||""; const price=p.prices?.price/100;
+    card.innerHTML=`<img class='prod-img' src='${img}' loading='lazy'><div class='prod-body'><div class='prod-title'>${p.name}</div><div class='prod-price'>CA$ ${price.toFixed(2)}</div></div>`;
+    box.appendChild(card);
+  });
+}
 
-    if (!hotCats.length) {
-      strip.innerHTML = '<div class="hot-empty">No hot picks yet.</div>';
-      return;
+function loadCache(){ const raw=localStorage.getItem(CACHE_KEY); if(!raw) return null; const data=JSON.parse(raw); if(Date.now()-data.time > CACHE_TTL) return null; return data.products; }
+function saveCache(products){ localStorage.setItem(CACHE_KEY, JSON.stringify({time:Date.now(), products})); }
+
+async function initPage(){
+  document.getElementById("hot-picks").innerHTML = "<div class='skeleton sk-hot'></div>".repeat(4);
+  document.getElementById("latest-products").innerHTML = "<div class='skeleton sk-prod'></div>".repeat(8);
+
+  const cats=await getCategories();
+  const hotCats=cats.filter(c=>c.slug.endsWith(HOT_SUFFIX));
+  renderHotPicks(hotCats);
+
+  let products = loadCache();
+  if(!products){
+    const mobileCats=cats.filter(c=>c.slug.endsWith(MOBILE_SUFFIX));
+    const ids=mobileCats.map(c=>c.id);
+    products=await getProductsByCat(ids);
+    saveCache(products);
+  }
+
+  products.sort(()=>Math.random()-0.5);
+  renderProducts(products);
+}
+
+let touchStartY=0;
+let isPulling=false;
+
+function setupPullToRefresh(){
+  const body=document.body;
+  body.addEventListener("touchstart", e=>{ touchStartY=e.touches[0].clientY; });
+  body.addEventListener("touchmove", e=>{
+    const y=e.touches[0].clientY;
+    if(window.scrollY===0 && y - touchStartY > 80 && !isPulling){ isPulling=true; body.style.transform="translateY(60px)"; }
+  });
+  body.addEventListener("touchend", async()=>{
+    if(isPulling){
+      await initPage();
+      body.style.transform="translateY(0)";
     }
+    isPulling=false;
+  });
+}
 
-    hotCats.forEach(cat => {
-      const icon = pickHotIcon(cat.slug);
-      const tag = cat.description || "Hot pick";
+window.onload=()=>{ initPage(); setupPullToRefresh(); };
+// ========== Infinite Scroll Load More Products ==========
+let productPage = 1;
+let isLoadingMore = false;
+const PRODUCTS_PER_PAGE = 20;
 
-      const card = document.createElement("div");
-      card.className = "hot-card";
-      card.innerHTML = `
-        <div class="hot-icon">${icon}</div>
-        <div class="hot-name">${cat.name}</div>
-        <div class="hot-tag">${tag}</div>
-      `;
-      card.onclick = () => window.location.href = cat.permalink;
-      strip.appendChild(card);
+async function loadMoreProducts(){
+  if(isLoadingMore) return;
+  isLoadingMore = true;
+
+  productPage++;
+  const cats = await getCategories();
+  const mobileCats = cats.filter(c => c.slug.endsWith(MOBILE_SUFFIX));
+  const ids = mobileCats.map(c=>c.id);
+
+  const qs = ids.map(id=>`category=${id}`).join("&");
+  const url = `${API}/products?per_page=${PRODUCTS_PER_PAGE}&page=${productPage}&${qs}`;
+
+  const more = await fetchJSON(url);
+  if(more.length){
+    const box=document.getElementById("latest-products");
+    more.forEach(p=>{
+      const card=document.createElement("div");
+      card.className="prod-card";
+      const img=p.images?.[0]?.src||"";
+      const price=p.prices?.price/100;
+      card.innerHTML=`<img class='prod-img' src='${img}' loading='lazy'><div class='prod-body'><div class='prod-title'>${p.name}</div><div class='prod-price'>CA$ ${price.toFixed(2)}</div></div>`;
+      card.onclick=()=> openProductDetail(p.id);
+      box.appendChild(card);
     });
-
-  } catch (e) {
-    console.error(e);
-    strip.innerHTML = '<div class="hot-empty">Failed to load hot picks.</div>';
   }
+
+  isLoadingMore=false;
 }
 
-// ===== Latest Products =====
-async function loadMobileCategories() {
-  const res = await fetch(`${apiBase}/products/categories?per_page=100`);
-  const cats = await res.json();
-  return cats.filter(c => c.slug.endsWith("_m") || c.slug.includes("_m_"));
-}
-
-async function loadProductsByCategories(ids) {
-  const url = `${apiBase}/products?per_page=50&category=${ids.join(",")}`;
-  const res = await fetch(url);
-  return res.json();
-}
-
-function mapProductToCard(p) {
-  return {
-    name: p.name,
-    price: p.prices.price / 100,
-    emoji: "🛒",
-    image: p.images?.[0]?.src ?? "",
-    rating: p.average_rating || 4.7,
-    reviews: p.rating_count || 0,
-    permalink: p.permalink
-  };
-}
-
-let feedData = [];
-let loadedCount = 0;
-const pageSize = 10;
-const feedGrid = document.getElementById("feedGrid");
-const feedLoading = document.getElementById("feedLoading");
-
-function createCard(item) {
-  const card = document.createElement("div");
-  card.className = "product-card";
-
-  card.innerHTML = `
-    <div class="product-img"><span>${item.emoji}</span></div>
-    <div class="product-body">
-      <div class="product-name">${item.name}</div>
-      <div class="product-price-row">
-        <div class="product-price">CA$ ${item.price.toFixed(2)}</div>
-        <div class="product-tag">New</div>
-      </div>
-      <div class="product-meta">
-        <div class="product-rating">⭐ ${item.rating} · ${item.reviews} reviews</div>
-        <div class="product-time">New</div>
-      </div>
-    </div>
-  `;
-
-  card.onclick = () => window.location.href = item.permalink;
-
-  return card;
-}
-
-function renderMore() {
-  const end = Math.min(loadedCount + pageSize, feedData.length);
-  for (let i = loadedCount; i < end; i++) {
-    feedGrid.appendChild(createCard(feedData[i]));
-  }
-  loadedCount = end;
-
-  feedLoading.textContent =
-    loadedCount >= feedData.length ? "You reached the end" : "Scroll to load more";
-}
-
-async function initFeed() {
-  feedLoading.textContent = "Loading…";
-
-  const cats = await loadMobileCategories();
-  const ids = cats.map(c => c.id);
-  const products = await loadProductsByCategories(ids);
-
-  feedData = products.map(mapProductToCard);
-  feedData.sort(() => Math.random() - 0.5);
-
-  feedGrid.innerHTML = "";
-  loadedCount = 0;
-  renderMore();
-}
-
-// Infinite scroll
-window.addEventListener("scroll", () => {
-  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
-    renderMore();
+window.addEventListener("scroll",()=>{
+  if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 500){
+    loadMoreProducts();
   }
 });
 
-// Init all
-window.onload = () => {
-  loadHotPicks();
-  initFeed();
-};
+// ========== Favorites System ===========
+function toggleFavorite(id){
+  let fav = JSON.parse(localStorage.getItem("favorites") || "[]");
+  if(fav.includes(id)) fav = fav.filter(x=>x!==id);
+  else fav.push(id);
+  localStorage.setItem("favorites", JSON.stringify(fav));
+}
+
+function isFavorite(id){
+  let fav = JSON.parse(localStorage.getItem("favorites") || "[]");
+  return fav.includes(id);
+}
+
+// ========== Product Detail Page Redirect ===========
+function openProductDetail(id){
+  window.location.href = `product_detail.html?id=${id}`;
+}
+
 </script>
+
+</body>
+</html>
