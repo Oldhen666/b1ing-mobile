@@ -9,8 +9,6 @@
   <script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleLogin()"></script>
   <!-- Facebook SDK -->
   <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
-  <!-- Sign in with Apple -->
-  <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -521,8 +519,7 @@
   // ==== 配置：把这里改成你自己的 App 信息 ====
   const GOOGLE_CLIENT_ID = "874569690729-8davcc3gf01t5vb470dom6pn28hvihcq.apps.googleusercontent.com";
   const FB_APP_ID = "YOUR_FB_APP_ID"; // TODO: 替换成你的 Facebook App ID
-  const APPLE_CLIENT_ID = "YOUR_APPLE_CLIENT_ID"; // TODO: 替换成你的 Sign in with Apple Client ID
-  const APPLE_REDIRECT_URI = "https://oldhen666.github.io/b1ing-mobile/apple-callback.html"; // TODO: 换成你实际的 redirect URI
+ 
 
   // ========== 通用 Profile 加载 ==========
   function loadProfile() {
@@ -698,46 +695,6 @@
     );
   }
 
-  // ========== Apple Login ==========
-  function initAppleLogin() {
-    if (!APPLE_CLIENT_ID || APPLE_CLIENT_ID === "YOUR_APPLE_CLIENT_ID") {
-      console.warn("Apple Sign-In not configured.");
-      return;
-    }
-    AppleID.auth.init({
-      clientId: APPLE_CLIENT_ID,
-      scope: "name email",
-      redirectURI: APPLE_REDIRECT_URI,
-      usePopup: true,
-    });
-  }
-
-  function loginWithApple() {
-    if (!APPLE_CLIENT_ID || APPLE_CLIENT_ID === "YOUR_APPLE_CLIENT_ID") {
-      alert("Please configure your Apple Sign-In clientId and redirect URI first.");
-      return;
-    }
-    AppleID.auth
-      .signIn()
-      .then(function (response) {
-        // 注意：Apple 之后可能不再返回完整信息，这里只做 demo
-        const user = response.user || {};
-        const name =
-          (user.name && (user.name.firstName || "") + " " + (user.name.lastName || "")) ||
-          "Apple User";
-        const email = user.email || "";
-
-        localStorage.setItem("user_name", name);
-        if (email) localStorage.setItem("user_email", email);
-
-        alert("Signed in with Apple as " + name);
-        loadProfile();
-      })
-      .catch(function (err) {
-        console.error(err);
-        alert("Apple sign-in failed.");
-      });
-  }
 
   // 初始化
   window.onload = function () {
