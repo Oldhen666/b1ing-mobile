@@ -1,390 +1,749 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>My Account - B1ing</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>B1ing – My Account</title>
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleLogin()"></script>
+  <!-- Facebook SDK -->
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+  <!-- Sign in with Apple -->
+  <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
 
   <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial;
-      background: #f7f7f7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: #f5f5f7;
       color: #222;
     }
 
-    .page {
-      max-width: 480px;
-      margin: 0 auto;
-      padding-bottom: 40px;
+    .account-page {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #ffb347, #ffcc33);
     }
 
-    /* 顶部标题 */
-    .header {
-      padding: 18px 16px 10px;
-      background: #ffffff;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      position: sticky;
-      top: 0;
-      z-index: 10;
+    .account-inner {
+      max-width: 480px;
+      margin: 0 auto;
+      padding-bottom: 72px;
     }
-    .header-title {
-      font-size: 20px;
+
+    /* 顶部背景 + 标题 */
+    .account-header {
+      padding: 48px 20px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+    }
+
+    .account-title {
+      font-size: 22px;
       font-weight: 700;
     }
-    .header-sub {
+
+    .account-subtitle {
       font-size: 13px;
-      color: #888;
+      opacity: 0.9;
       margin-top: 4px;
     }
 
-    /* 用户信息卡片 */
+    .header-icons {
+      display: flex;
+      gap: 14px;
+      font-size: 20px;
+      opacity: 0.95;
+    }
+
+    /* 个人信息卡片 */
     .profile-card {
-      margin: 12px 16px;
-      background: #ffffff;
-      border-radius: 14px;
-      padding: 14px 14px;
+      background: #fff;
+      border-radius: 22px;
+      margin: 0 16px;
+      padding: 16px 16px 12px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+      transform: translateY(-10px);
+    }
+
+    .profile-header {
       display: flex;
       align-items: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     }
+
     .avatar {
-      width: 46px;
-      height: 46px;
+      width: 54px;
+      height: 54px;
       border-radius: 50%;
-      background: linear-gradient(135deg,#ff8a00,#ff3d81);
+      background: linear-gradient(135deg, #ff9966, #ff5e62);
       color: #fff;
-      font-size: 22px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-right: 12px;
+      font-size: 26px;
+      font-weight: 700;
+      margin-right: 14px;
       flex-shrink: 0;
+      overflow: hidden;
     }
-    .profile-main {
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .user-info-main {
       flex: 1;
     }
-    .profile-name {
-      font-size: 16px;
-      font-weight: 600;
+
+    .user-name {
+      font-size: 18px;
+      font-weight: 700;
     }
-    .profile-email {
+
+    .user-email {
       font-size: 13px;
-      color: #888;
+      color: #666;
       margin-top: 4px;
-    }
-    .profile-edit {
-      font-size: 12px;
-      color: #ff5500;
-      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    /* 小统计条（收藏 / 购物车 / 优惠券） */
+    .user-tags {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 11px;
+    }
+
+    .tag-pill {
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: #fff6df;
+      color: #d68b00;
+      border: 1px solid #ffe2a6;
+    }
+
+    .tag-pill.secondary {
+      background: #f0f3ff;
+      color: #4253ff;
+      border-color: #c7d0ff;
+    }
+
+    .profile-badge {
+      font-size: 12px;
+      color: #999;
+    }
+
+    /* 快速统计 */
     .stats-row {
       display: flex;
-      margin: 0 16px 8px;
-      gap: 8px;
+      text-align: center;
+      padding-top: 12px;
+      margin-top: 12px;
+      border-top: 1px solid #f0f0f0;
     }
-    .stat-pill {
+
+    .stat-item {
       flex: 1;
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 10px 10px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      font-size: 12px;
+    }
+
+    .stat-label {
+      color: #777;
+    }
+
+    .stat-value {
+      font-weight: 700;
+      font-size: 16px;
+      margin-top: 4px;
+      color: #222;
+    }
+
+    /* 登录区 */
+    .login-panel {
+      margin: 6px 16px 0;
+      padding: 14px 14px 12px;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    .login-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .login-subtitle {
+      font-size: 12px;
+      color: #777;
+      margin-bottom: 12px;
+    }
+
+    .social-buttons {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .social-btn {
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid #e1e1e1;
+      background: #fff;
+      padding: 8px 14px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
       justify-content: center;
-      font-size: 12px;
+      gap: 8px;
       cursor: pointer;
     }
-    .stat-label {
-      color: #999;
-      margin-bottom: 4px;
-    }
-    .stat-value {
-      font-size: 15px;
-      font-weight: 600;
+
+    .social-btn span {
+      flex: 1;
+      text-align: center;
     }
 
-    /* 区块标题 */
-    .section-title {
-      margin: 14px 16px 6px;
-      font-size: 14px;
-      font-weight: 700;
-      color: #555;
+    .social-icon {
+      font-size: 18px;
     }
 
-    /* 菜单列表 */
-    .menu-group {
-      margin: 0 16px 8px;
-      background: #ffffff;
-      border-radius: 14px;
+    .social-btn.google { border-color: #e4e4e4; }
+    .social-btn.facebook { border-color: #3b5998; color: #3b5998; }
+    .social-btn.apple {
+      border-color: #000;
+      color: #000;
+      background: #fff;
+    }
+
+    /* 分组标题 */
+    .section-block {
+      margin: 14px 12px 0;
+      border-radius: 18px;
       overflow: hidden;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      background: #fff;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.04);
     }
+
+    .section-header {
+      padding: 10px 14px 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #777;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-header span:last-child {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .menu-list {
+      padding: 4px 0 8px;
+    }
+
     .menu-item {
       display: flex;
       align-items: center;
-      padding: 12px 14px;
+      padding: 10px 14px;
       font-size: 14px;
       cursor: pointer;
-    }
-    .menu-item + .menu-item {
-      border-top: 1px solid #f0f0f0;
-    }
-    .menu-icon {
-      width: 26px;
-      text-align: center;
-      font-size: 17px;
-      margin-right: 10px;
-    }
-    .menu-text-main {
-      flex: 1;
-    }
-    .menu-text-sub {
-      font-size: 12px;
-      color: #999;
-      margin-top: 2px;
-    }
-    .menu-arrow {
-      font-size: 16px;
-      color: #bbb;
-      margin-left: 6px;
     }
 
-    /* Logout */
-    .logout-btn {
-      margin: 14px 16px;
-      padding: 12px 0;
+    .menu-item + .menu-item {
+      border-top: 1px solid #f3f3f3;
+    }
+
+    .menu-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .menu-icon {
+      width: 24px;
       text-align: center;
-      background: #fff1f1;
-      color: #e64545;
-      border-radius: 999px;
+      font-size: 18px;
+    }
+
+    .menu-title {
       font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .menu-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      color: #aaa;
+      gap: 4px;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #fff4e0;
+      color: #c96a00;
+      border: 1px solid #ffdda5;
+    }
+
+    /* 底部导航占位（给 AppMySite 底栏留空间用的） */
+    .bottom-safe {
+      height: 72px;
+    }
+
+    @media (min-width: 480px) {
+      .account-inner { margin-top: 10px; }
     }
   </style>
 </head>
 <body>
-<div class="page">
+<div class="account-page">
+  <div class="account-inner">
 
-  <!-- header -->
-  <div class="header">
-    <div class="header-title">My Account</div>
-    <div class="header-sub">Manage your profile, orders and favorites</div>
+    <!-- 顶部 -->
+    <div class="account-header">
+      <div>
+        <div class="account-title">My Account</div>
+        <div class="account-subtitle">Manage orders, favorites & profile</div>
+      </div>
+      <div class="header-icons">
+        <span>🔔</span>
+        <span>⚙️</span>
+      </div>
+    </div>
+
+    <!-- 个人信息卡片 -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="avatar" id="user-avatar-wrapper">
+          <span id="user-initial">B</span>
+        </div>
+        <div class="user-info-main">
+          <div class="user-name" id="user-name">Guest</div>
+          <div class="user-email" id="user-email">Sign in to sync your orders</div>
+          <div class="user-tags">
+            <span class="tag-pill">Member</span>
+            <span class="tag-pill secondary">Mobile App</span>
+          </div>
+        </div>
+        <div class="profile-badge" id="profile-status">Not signed in</div>
+      </div>
+
+      <!-- quick stats -->
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-label">Orders</div>
+          <div class="stat-value" id="stat-orders">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Favorites</div>
+          <div class="stat-value" id="stat-favs">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Coupons</div>
+          <div class="stat-value" id="stat-coupons">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 登录 / 三方账号区域 -->
+    <div class="login-panel" id="login-panel">
+      <div class="login-title">Sign in or create your B1ing account</div>
+      <div class="login-subtitle">
+        Use Google, Facebook or Apple to quickly sign in and sync your orders & favorites.
+      </div>
+      <div class="social-buttons">
+        <!-- Google button容器：由 GIS 渲染 -->
+        <div id="google-btn" class="social-btn google">
+          <span>Continue with Google</span>
+        </div>
+
+        <button class="social-btn facebook" onclick="loginWithFacebook()">
+          <span class="social-icon">📘</span>
+          <span>Continue with Facebook</span>
+          <span></span>
+        </button>
+
+        <button class="social-btn apple" onclick="loginWithApple()">
+          <span class="social-icon"></span>
+          <span>Continue with Apple</span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Orders & After-sales -->
+    <div class="section-block">
+      <div class="section-header">
+        <span>Orders & After-sales</span>
+        <span>View all &gt;</span>
+      </div>
+      <div class="menu-list">
+        <div class="menu-item" onclick="openSection('orders')">
+          <div class="menu-left">
+            <div class="menu-icon">📦</div>
+            <div class="menu-title">My Orders</div>
+          </div>
+          <div class="menu-right">
+            <span class="badge">New</span>
+            <span>All statuses</span>
+            <span>›</span>
+          </div>
+        </div>
+
+        <div class="menu-item" onclick="openSection('address')">
+          <div class="menu-left">
+            <div class="menu-icon">🏠</div>
+            <div class="menu-title">Shipping Address</div>
+          </div>
+          <div class="menu-right">
+            <span>Manage</span>
+            <span>›</span>
+          </div>
+        </div>
+
+        <div class="menu-item" onclick="openSection('coupons')">
+          <div class="menu-left">
+            <div class="menu-icon">🎟️</div>
+            <div class="menu-title">Coupons</div>
+          </div>
+          <div class="menu-right">
+            <span id="coupon-count">0 available</span>
+            <span>›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Favorites / Cart / Recently viewed -->
+    <div class="section-block">
+      <div class="section-header">
+        <span>Shortcuts</span>
+        <span>Personalized</span>
+      </div>
+      <div class="menu-list">
+        <div class="menu-item" onclick="openSection('favorites')">
+          <div class="menu-left">
+            <div class="menu-icon">❤️</div>
+            <div class="menu-title">My Favorites</div>
+          </div>
+          <div class="menu-right">
+            <span>All saved items</span>
+            <span>›</span>
+          </div>
+        </div>
+
+        <div class="menu-item" onclick="openSection('cart')">
+          <div class="menu-left">
+            <div class="menu-icon">🛒</div>
+            <div class="menu-title">My Cart</div>
+          </div>
+          <div class="menu-right">
+            <span>Check out</span>
+            <span>›</span>
+          </div>
+        </div>
+
+        <div class="menu-item" onclick="openSection('history')">
+          <div class="menu-left">
+            <div class="menu-icon">👀</div>
+            <div class="menu-title">Recently Viewed</div>
+          </div>
+          <div class="menu-right">
+            <span>Browse again</span>
+            <span>›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings & Sign out -->
+    <div class="section-block">
+      <div class="section-header">
+        <span>Settings & Help</span>
+        <span></span>
+      </div>
+      <div class="menu-list">
+        <div class="menu-item" onclick="openSection('profile')">
+          <div class="menu-left">
+            <div class="menu-icon">👤</div>
+            <div class="menu-title">Profile & Preferences</div>
+          </div>
+          <div class="menu-right">
+            <span>Edit</span>
+            <span>›</span>
+          </div>
+        </div>
+
+        <div class="menu-item" onclick="openSection('support')">
+          <div class="menu-left">
+            <div class="menu-icon">💬</div>
+            <div class="menu-title">Customer Support</div>
+          </div>
+          <div class="menu-right">
+            <span>Chat now</span>
+            <span>›</span>
+          </div>
+        </div>
+
+        <div class="menu-item" onclick="handleSignOut()">
+          <div class="menu-left">
+            <div class="menu-icon">🚪</div>
+            <div class="menu-title">Sign out</div>
+          </div>
+          <div class="menu-right">
+            <span>Current device</span>
+            <span>›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-safe"></div>
   </div>
-
-  <!-- profile -->
-  <div class="profile-card">
-    <div class="avatar" id="avatar-initial">B</div>
-    <div class="profile-main">
-      <div class="profile-name" id="profile-name">Guest</div>
-      <div class="profile-email" id="profile-email">Tap to login on website</div>
-    </div>
-    <div class="profile-edit" onclick="openProfile()">
-      Edit &nbsp;›
-    </div>
-  </div>
-
-  <!-- quick stats -->
-  <div class="stats-row">
-    <div class="stat-pill" onclick="openFavorites()">
-      <div class="stat-label">Favorites</div>
-      <div class="stat-value" id="stat-fav">0</div>
-    </div>
-    <div class="stat-pill" onclick="openCart()">
-      <div class="stat-label">My Cart</div>
-      <div class="stat-value" id="stat-cart">0</div>
-    </div>
-    <div class="stat-pill" onclick="openCoupons()">
-      <div class="stat-label">Coupons</div>
-      <div class="stat-value" id="stat-coupon">0</div>
-    </div>
-  </div>
-
-  <!-- orders -->
-  <div class="section-title">My Orders</div>
-  <div class="menu-group">
-    <div class="menu-item" onclick="openOrders('all')">
-      <div class="menu-icon">📦</div>
-      <div class="menu-text-main">
-        All Orders
-        <div class="menu-text-sub">View your full order history</div>
-      </div>
-      <div class="menu-arrow">›</div>
-    </div>
-    <div class="menu-item" onclick="openOrders('processing')">
-      <div class="menu-icon">🧵</div>
-      <div class="menu-text-main">
-        Processing / In production
-        <div class="menu-text-sub">Custom & personalized items in progress</div>
-      </div>
-      <div class="menu-arrow">›</div>
-    </div>
-    <div class="menu-item" onclick="openOrders('shipped')">
-      <div class="menu-icon">🚚</div>
-      <div class="menu-text-main">
-        Shipped
-        <div class="menu-text-sub">Track your shipped parcels</div>
-      </div>
-      <div class="menu-arrow">›</div>
-    </div>
-    <div class="menu-item" onclick="openOrders('completed')">
-      <div class="menu-icon">✅</div>
-      <div class="menu-text-main">
-        Completed
-        <div class="menu-text-sub">Past orders & re-order options</div>
-      </div>
-      <div class="menu-arrow">›</div>
-    </div>
-  </div>
-
-  <!-- favorites & cart & address etc. -->
-  <div class="section-title">My Stuff</div>
-  <div class="menu-group">
-    <div class="menu-item" onclick="openFavorites()">
-      <div class="menu-icon">❤️</div>
-      <div class="menu-text-main">
-        My Favorites
-        <div class="menu-text-sub">Your saved sofas, tents, gifts & more</div>
-      </div>
-      <div class="menu-arrow">›</div>
-    </div>
-    <div class="menu-item" onclick="openCart()">
-      <div class="menu-icon">🛒</div>
-      <div class="menu-text-main">
-        My Cart
-        <div class="menu-text-sub">Review and checkout your items</div>
-      </div>
-      <div class="menu-arrow">›</div>
-    </div>
-    <div class="menu-item" onclick="openCoupons()">
-      <div class="menu-icon">🎟️</div>
-      <div class="menu-text-main">
-        My Coupons
-        <div class="menu-text-sub">Promo codes & discounts</div>
-      </div>
-      <div class="menu-arrow">›</div>
-    </div>
-    <div class="menu-item" onclick="openAddresses()">
-      <div class="menu-icon">🏠</div>
-      <div class="menu-text-main">
-        My Addresses
-        <div class="menu-text-sub">Shipping & billing addresses</div>
-      </div>
-      <div class="menu-arrow">›</div>
-    </div>
-  </div>
-
-  <!-- tracking & settings -->
-  <div class="section-title">More</div>
-  <div class="menu-group">
-    <div class="menu-item" onclick="openTracking()">
-      <div class="menu-icon">🔍</div>
-      <div class="menu-text-main">
-        Order Tracking
-        <div class="menu-text-sub">Check parcel delivery status</div>
-      </div>
-      <div class="menu-arrow">›</div>
-    </div>
-    <div class="menu-item" onclick="openSettings()">
-      <div class="menu-icon">⚙️</div>
-      <div class="menu-text-main">
-        Settings
-        <div class="menu-text-sub">Language, appearance and notifications</div>
-      </div>
-      <div class="menu-arrow">›</div>
-    </div>
-  </div>
-
-  <!-- logout -->
-  <div class="logout-btn" onclick="logoutAccount()">
-    Log out
-  </div>
-
 </div>
 
 <script>
-  // ======= 简单从 localStorage 读收藏数量（和 home.html 同一套 favorites 机制） =======
-  function loadStats() {
-    // Favorites
-    try {
-      const fav = JSON.parse(localStorage.getItem("favorites") || "[]");
-      document.getElementById("stat-fav").textContent = fav.length;
-    } catch(e) {
-      document.getElementById("stat-fav").textContent = "0";
+  // ==== 配置：把这里改成你自己的 App 信息 ====
+  const GOOGLE_CLIENT_ID = "874569690729-8davcc3gf01t5vb470dom6pn28hvihcq.apps.googleusercontent.com";
+  const FB_APP_ID = "YOUR_FB_APP_ID"; // TODO: 替换成你的 Facebook App ID
+  const APPLE_CLIENT_ID = "YOUR_APPLE_CLIENT_ID"; // TODO: 替换成你的 Sign in with Apple Client ID
+  const APPLE_REDIRECT_URI = "https://oldhen666.github.io/b1ing-mobile/apple-callback.html"; // TODO: 换成你实际的 redirect URI
+
+  // ========== 通用 Profile 加载 ==========
+  function loadProfile() {
+    const name = localStorage.getItem("user_name");
+    const email = localStorage.getItem("user_email");
+    const avatarUrl = localStorage.getItem("user_avatar");
+
+    const displayName = name || "Guest";
+    const displayEmail = email || "Sign in to sync your orders";
+
+    document.getElementById("user-name").textContent = displayName;
+    document.getElementById("user-email").textContent = displayEmail;
+
+    const avatarWrapper = document.getElementById("user-avatar-wrapper");
+    const initialEl = document.getElementById("user-initial");
+
+    if (avatarUrl) {
+      avatarWrapper.innerHTML = '<img src="' + avatarUrl + '" alt="avatar">';
+    } else {
+      avatarWrapper.innerHTML = '<span id="user-initial"></span>';
+      const initial = displayName ? displayName.charAt(0).toUpperCase() : "B";
+      document.getElementById("user-initial").textContent = initial;
     }
 
-    // Cart （先用占位；未来你接 WooCommerce cart token 后再改）
-    const cartCount = Number(localStorage.getItem("cart_count") || "0");
-    document.getElementById("stat-cart").textContent = cartCount;
+    const statusEl = document.getElementById("profile-status");
+    const loginPanel = document.getElementById("login-panel");
 
-    // Coupons 占位（未来接 WooCommerce coupon API）
-    const couponCount = Number(localStorage.getItem("coupon_count") || "0");
-    document.getElementById("stat-coupon").textContent = couponCount;
+    if (name && email) {
+      statusEl.textContent = "Signed in";
+      loginPanel.style.display = "none";
+    } else {
+      statusEl.textContent = "Not signed in";
+      loginPanel.style.display = "block";
+    }
   }
 
-  // ======= Profile 占位：如果以后你在 WebView 中传入用户名，可以从 localStorage 或 URL 参数恢复 =======
-  function loadProfile() {
-    const name = localStorage.getItem("user_name") || "Guest";
-    const email = localStorage.getItem("user_email") || "";
-    document.getElementById("profile-name").textContent = name;
-    document.getElementById("avatar-initial").textContent = name.charAt(0).toUpperCase() || "B";
-    document.getElementById("profile-email").textContent =
-      email ? email : "Tap to login on website";
+  function loadStats() {
+    // 这里可以将来接真正 API，目前先用本地缓存做演示
+    const orders = parseInt(localStorage.getItem("stat_orders") || "0", 10);
+    const favs = parseInt(localStorage.getItem("stat_favs") || "0", 10);
+    const coupons = parseInt(localStorage.getItem("stat_coupons") || "0", 10);
+
+    document.getElementById("stat-orders").textContent = orders;
+    document.getElementById("stat-favs").textContent = favs;
+    document.getElementById("stat-coupons").textContent = coupons;
+    document.getElementById("coupon-count").textContent = coupons + " available";
   }
 
-  // ======= 跳转函数：先用 GitHub Pages 的 HTML 作为目标 =======
-  function openProfile() {
-    // 将来可以跳到你的 WordPress /my-account/ 页面或 profile.html
-    window.location.href = "https://b1ing.ca/my-account/";
+  function openSection(key) {
+    // 这里先用 alert，占位，后面你可以换成实际页面跳转
+    if (key === "favorites") {
+      window.location.href = "favorites.html"; // TODO: 你自己的收藏页面
+    } else if (key === "cart") {
+      window.location.href = "cart.html"; // TODO: 你的购物车页面
+    } else {
+      alert("Open section: " + key + " (you can hook this to real pages)");
+    }
   }
 
-  function openOrders(status) {
-    // 预留：将来可以做 orders.html?status=processing 这种
-    window.location.href = "orders.html?status=" + encodeURIComponent(status);
+  function handleSignOut() {
+    if (!localStorage.getItem("user_name") && !localStorage.getItem("user_email")) {
+      alert("You are not signed in.");
+      return;
+    }
+    if (confirm("Sign out from this device?")) {
+      localStorage.removeItem("user_name");
+      localStorage.removeItem("user_email");
+      localStorage.removeItem("user_avatar");
+      alert("You have been signed out.");
+      loadProfile();
+    }
   }
 
-  function openFavorites() {
-    window.location.href = "favorites.html";
+  // ========== Google Login ==========
+  function parseJwt(token) {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map(function (c) {
+          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
   }
 
-  function openCart() {
-    // 可以直接跳 WooCommerce 购物车页，或者 cart.html WebView
-    window.location.href = "https://b1ing.ca/cart/";
+  function handleGoogleCredential(response) {
+    try {
+      const data = parseJwt(response.credential);
+      const name = data.name || data.given_name || "Google User";
+      const email = data.email || "";
+      const picture = data.picture || "";
+
+      localStorage.setItem("user_name", name);
+      localStorage.setItem("user_email", email);
+      if (picture) localStorage.setItem("user_avatar", picture);
+
+      alert("Signed in with Google as " + name);
+      loadProfile();
+    } catch (e) {
+      console.error(e);
+      alert("Failed to parse Google login info.");
+    }
   }
 
-  function openCoupons() {
-    window.location.href = "coupons.html";
+  function initGoogleLogin() {
+    if (!window.google || !google.accounts || !google.accounts.id) return;
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleCredential,
+      auto_select: false,
+      cancel_on_tap_outside: true,
+    });
+
+    const btn = document.getElementById("google-btn");
+    if (btn) {
+      google.accounts.id.renderButton(btn, {
+        type: "standard",
+        theme: "outline",
+        text: "continue_with",
+        shape: "pill",
+        width: 320,
+      });
+    }
   }
 
-  function openAddresses() {
-    window.location.href = "addresses.html";
+  // ========== Facebook Login ==========
+  window.fbAsyncInit = function () {
+    if (!FB_APP_ID || FB_APP_ID === "YOUR_FB_APP_ID") {
+      console.warn("Facebook App ID not configured.");
+      return;
+    }
+    FB.init({
+      appId: FB_APP_ID,
+      cookie: true,
+      xfbml: false,
+      version: "v21.0",
+    });
+  };
+
+  function loginWithFacebook() {
+    if (!FB_APP_ID || FB_APP_ID === "YOUR_FB_APP_ID") {
+      alert("Please configure your Facebook App ID in my_account.html first.");
+      return;
+    }
+
+    FB.login(
+      function (response) {
+        if (response.authResponse) {
+          FB.api(
+            "/me",
+            { fields: "name,email,picture" },
+            function (user) {
+              const name = user.name || "Facebook User";
+              const email = user.email || "";
+              const picture = user.picture && user.picture.data && user.picture.data.url;
+
+              localStorage.setItem("user_name", name);
+              if (email) localStorage.setItem("user_email", email);
+              if (picture) localStorage.setItem("user_avatar", picture);
+
+              alert("Signed in with Facebook as " + name);
+              loadProfile();
+            }
+          );
+        } else {
+          console.log("Facebook login cancelled.");
+        }
+      },
+      { scope: "public_profile,email" }
+    );
   }
 
-  function openTracking() {
-    window.location.href = "tracking.html";
+  // ========== Apple Login ==========
+  function initAppleLogin() {
+    if (!APPLE_CLIENT_ID || APPLE_CLIENT_ID === "YOUR_APPLE_CLIENT_ID") {
+      console.warn("Apple Sign-In not configured.");
+      return;
+    }
+    AppleID.auth.init({
+      clientId: APPLE_CLIENT_ID,
+      scope: "name email",
+      redirectURI: APPLE_REDIRECT_URI,
+      usePopup: true,
+    });
   }
 
-  function openSettings() {
-    window.location.href = "settings.html";
+  function loginWithApple() {
+    if (!APPLE_CLIENT_ID || APPLE_CLIENT_ID === "YOUR_APPLE_CLIENT_ID") {
+      alert("Please configure your Apple Sign-In clientId and redirect URI first.");
+      return;
+    }
+    AppleID.auth
+      .signIn()
+      .then(function (response) {
+        // 注意：Apple 之后可能不再返回完整信息，这里只做 demo
+        const user = response.user || {};
+        const name =
+          (user.name && (user.name.firstName || "") + " " + (user.name.lastName || "")) ||
+          "Apple User";
+        const email = user.email || "";
+
+        localStorage.setItem("user_name", name);
+        if (email) localStorage.setItem("user_email", email);
+
+        alert("Signed in with Apple as " + name);
+        loadProfile();
+      })
+      .catch(function (err) {
+        console.error(err);
+        alert("Apple sign-in failed.");
+      });
   }
 
-  function logoutAccount() {
-    // 简单版本：清理本地用户信息，跳回首页或登录页
-    localStorage.removeItem("user_name");
-    localStorage.removeItem("user_email");
-    alert("You have been logged out on this device.");
-    loadProfile();
-  }
-
+  // 初始化
   window.onload = function () {
     loadProfile();
     loadStats();
+    initAppleLogin(); // Apple 需要在页面 ready 时初始化
   };
 </script>
 </body>
