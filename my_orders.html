@@ -1,382 +1,115 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>My Orders - B1ing</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial;
-      background: #f7f7f7;
-      color: #222;
-    }
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Orders</title>
 
-    /* 顶部导航条 */
-    .nav-bar {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      padding: 10px 12px;
-      background: #ffb84d;
-      color: #222;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    }
-    .nav-back {
-      font-size: 20px;
-      padding: 4px 8px 4px 0;
-      cursor: pointer;
-    }
-    .nav-title {
-      font-size: 18px;
-      font-weight: 700;
-    }
+<style>
+  body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial; background:#f7f7f7; }
 
-    /* 顶部筛选 tab */
-    .tabs {
-      display: flex;
-      overflow-x: auto;
-      background: #fff7e6;
-      padding: 8px 8px 4px;
-    }
-    .tabs::-webkit-scrollbar { display: none; }
-    .tab-item {
-      padding: 6px 14px;
-      border-radius: 999px;
-      margin-right: 8px;
-      font-size: 14px;
-      white-space: nowrap;
-      cursor: pointer;
-      border: 1px solid transparent;
-      color: #555;
-    }
-    .tab-item.active {
-      background: #ff6a00;
-      color: #fff;
-      border-color: #ff6a00;
-      font-weight: 600;
-    }
+  .page-title {
+    font-size:20px; font-weight:700; padding:16px; background:white;
+    box-shadow:0 1px 4px rgba(0,0,0,0.08); margin-bottom:14px;
+  }
 
-    /* 列表容器 */
-    .order-list {
-      padding: 10px 10px 20px;
-    }
+  #orders-list { padding:12px; }
 
-    .order-card {
-      background: #fff;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-      overflow: hidden;
-      cursor: pointer;
-    }
+  .order-card {
+    background:white; border-radius:12px; padding:14px; margin-bottom:12px;
+    box-shadow:0 1px 5px rgba(0,0,0,0.1);
+  }
 
-    .order-header,
-    .order-footer {
-      padding: 10px 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-    }
+  .order-header { display:flex; justify-content:space-between; font-size:14px; margin-bottom:10px; }
+  .order-no { font-weight:600; }
+  .order-status { color:#ff5500; }
 
-    .order-header {
-      border-bottom: 1px solid #f0f0f0;
-    }
+  .order-body { display:flex; gap:12px; }
+  .order-thumb { width:70px; height:70px; border-radius:10px; object-fit:cover; background:#eee; }
 
-    .order-id {
-      font-weight: 600;
-    }
-    .order-status {
-      font-weight: 600;
-    }
-    .status-pending { color: #ff9500; }
-    .status-processing { color: #007aff; }
-    .status-completed { color: #34c759; }
-    .status-cancelled { color: #999; }
+  .order-info { flex:1; font-size:13px; }
+  .order-title { font-weight:600; margin-bottom:4px; }
+  .order-items { color:#666; margin-bottom:4px; }
+  .order-date { color:#999; }
 
-    .order-body {
-      padding: 10px 12px;
-      display: flex;
-      gap: 10px;
-      border-bottom: 1px solid #f5f5f5;
-    }
+  .order-total { font-size:16px; font-weight:700; color:#ff5500; align-self:center; }
 
-    .order-thumb {
-      width: 64px;
-      height: 64px;
-      border-radius: 8px;
-      background: #f0f0f0;
-      object-fit: cover;
-      flex-shrink: 0;
-    }
-
-    .order-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .order-title {
-      font-size: 14px;
-      font-weight: 500;
-      max-height: 40px;
-      overflow: hidden;
-      line-height: 20px;
-    }
-
-    .order-meta {
-      font-size: 12px;
-      color: #777;
-      margin-top: 4px;
-    }
-
-    .order-total {
-      font-size: 14px;
-      font-weight: 700;
-      color: #ff5500;
-    }
-
-    .order-footer-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .order-btn {
-      border-radius: 999px;
-      border: 1px solid #ff6a00;
-      padding: 4px 10px;
-      font-size: 12px;
-      color: #ff6a00;
-      background: #fff;
-      cursor: pointer;
-    }
-
-    .order-btn.primary {
-      background: #ff6a00;
-      color: #fff;
-    }
-
-    /* 空状态 */
-    .empty-state {
-      padding: 60px 30px;
-      text-align: center;
-      color: #999;
-      font-size: 14px;
-    }
-    .empty-state-icon {
-      font-size: 48px;
-      margin-bottom: 10px;
-    }
-    .empty-state button {
-      border-radius: 999px;
-      border: none;
-      padding: 8px 22px;
-      margin-top: 16px;
-      font-size: 14px;
-      background: #ff6a00;
-      color: #fff;
-      cursor: pointer;
-    }
-  </style>
+  .loading { text-align:center; padding:20px; color:#666; }
+  .empty { text-align:center; padding:30px; color:#999; }
+</style>
 </head>
+
 <body>
 
-  <!-- 顶部导航 -->
-  <div class="nav-bar">
-    <div class="nav-back" onclick="history.back()">‹</div>
-    <div class="nav-title">My Orders</div>
-  </div>
+<div class="page-title">My Orders</div>
+<div id="orders-list"></div>
 
-  <!-- 筛选 Tabs -->
-  <div class="tabs" id="order-tabs">
-    <div class="tab-item active" data-filter="all">All</div>
-    <div class="tab-item" data-filter="pending">To Pay</div>
-    <div class="tab-item" data-filter="processing">To Ship</div>
-    <div class="tab-item" data-filter="shipped">To Receive</div>
-    <div class="tab-item" data-filter="completed">Completed</div>
-    <div class="tab-item" data-filter="cancelled">Cancelled</div>
-  </div>
+<script>
+const ORDERS_API = "https://b1ing.ca/wp-json/b1ing/v1/orders";
 
-  <!-- 列表 -->
-  <div class="order-list" id="order-list"></div>
+/* ========== 加载订单 ========== */
+async function loadOrdersFromAPI() {
+  const list = document.getElementById("orders-list");
+  list.innerHTML = `<div class="loading">Loading your orders...</div>`;
 
-  <script>
-    // ==== 模拟 / 读取订单数据 ====
+  try {
+    const res = await fetch(ORDERS_API, {
+      credentials: "include" // 必须带上，以后你恢复权限才能取到登录用户订单
+    });
 
-    // 将来你接 WooCommerce API 时，把这个函数改掉即可
-    async function loadOrdersFromAPI() {
-      // 1. 先看 localStorage 是否有订单（供 App 使用）
-      const localRaw = localStorage.getItem('orders');
-      if (localRaw) {
-        try {
-          return JSON.parse(localRaw);
-        } catch (e) {
-          console.warn('Invalid orders in localStorage');
-        }
-      }
-
-      // 2. 如果没有，就给一些示例数据（便于你调 UI）
-      return [
-        {
-          id: 10001,
-          number: 'B1-10001',
-          status: 'pending', // pending / processing / shipped / completed / cancelled
-          date: '2025-11-22 20:18',
-          total: 23.99,
-          currency: 'CAD',
-          item_title: 'Custom Pet Tag Engraving',
-          thumb: 'https://b1ing.ca/wp-content/uploads/2024/10/pet-tag-1-600x600.jpg',
-          items_count: 1
-        },
-        {
-          id: 10002,
-          number: 'B1-10002',
-          status: 'completed',
-          date: '2025-11-20 14:35',
-          total: 89.50,
-          currency: 'CAD',
-          item_title: 'Kids Sofa + Name Embroidery',
-          thumb: 'https://b1ing.ca/wp-content/uploads/2024/10/kids-sofa-600x600.jpg',
-          items_count: 2
-        }
-      ];
+    if (!res.ok) {
+      list.innerHTML = `<div class="empty">Failed to load orders.</div>`;
+      return;
     }
 
-    // 状态文本映射
-    function statusLabel(status) {
-      switch (status) {
-        case 'pending': return 'To Pay';
-        case 'processing': return 'To Ship';
-        case 'shipped': return 'To Receive';
-        case 'completed': return 'Completed';
-        case 'cancelled': return 'Cancelled';
-        default: return status;
-      }
-    }
+    const orders = await res.json();
+    renderOrders(orders);
+  } catch (e) {
+    console.error(e);
+    list.innerHTML = `<div class="empty">Network error</div>`;
+  }
+}
 
-    // 状态样式 class
-    function statusClass(status) {
-      switch (status) {
-        case 'pending': return 'status-pending';
-        case 'processing':
-        case 'shipped':
-          return 'status-processing';
-        case 'completed': return 'status-completed';
-        case 'cancelled': return 'status-cancelled';
-        default: return '';
-      }
-    }
+/* ========== 渲染订单 ========== */
+function renderOrders(orders) {
+  const list = document.getElementById("orders-list");
 
-    // 渲染订单列表
-    function renderOrders(orders, filter = 'all') {
-      const container = document.getElementById('order-list');
-      container.innerHTML = '';
+  if (!orders.length) {
+    list.innerHTML = `<div class="empty">You have no orders yet.</div>`;
+    return;
+  }
 
-      let filtered = orders;
-      if (filter !== 'all') {
-        if (filter === 'shipped') {
-          // 这里把 shipped 视为「在路上」，你以后可以拆成发货和在途
-          filtered = orders.filter(o => o.status === 'shipped');
-        } else {
-          filtered = orders.filter(o => o.status === filter);
-        }
-      }
+  list.innerHTML = "";
 
-      if (!filtered.length) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-state-icon">📭</div>
-            <div>No orders in this category.</div>
-            <button onclick="goShopping()">Go shopping</button>
-          </div>
-        `;
-        return;
-      }
+  orders.forEach(o => {
+    const div = document.createElement("div");
+    div.className = "order-card";
 
-      filtered.forEach(order => {
-        const card = document.createElement('div');
-        card.className = 'order-card';
-        card.onclick = () => openOrderDetail(order);
+    div.innerHTML = `
+      <div class="order-header">
+        <span class="order-no">${o.number}</span>
+        <span class="order-status">${o.status}</span>
+      </div>
 
-        card.innerHTML = `
-          <div class="order-header">
-            <div class="order-id">Order #${order.number || order.id}</div>
-            <div class="order-status ${statusClass(order.status)}">
-              ${statusLabel(order.status)}
-            </div>
-          </div>
-          <div class="order-body">
-            <img class="order-thumb" src="${order.thumb || ''}" alt="">
-            <div class="order-info">
-              <div class="order-title">${order.item_title || 'Order items'}</div>
-              <div class="order-meta">
-                ${order.items_count || 1} item · ${order.date || ''}
-              </div>
-            </div>
-          </div>
-          <div class="order-footer">
-            <div class="order-total">
-              CA$ ${Number(order.total || 0).toFixed(2)}
-            </div>
-            <div class="order-footer-right">
-              <button class="order-btn" onclick="trackOrder(event, ${order.id})">
-                Track
-              </button>
-              ${order.status === 'pending'
-                ? '<button class="order-btn primary" onclick="payNow(event, '+order.id+')">Pay now</button>'
-                : ''}
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
+      <div class="order-body">
+        <img class="order-thumb" src="${o.thumb || ''}" />
 
-    // 点击卡片打开详情页（预留）
-    function openOrderDetail(order) {
-      // 以后你可以改成：window.location.href = 'order_detail.html?id=' + order.id;
-      console.log('Open order detail', order);
-    }
+        <div class="order-info">
+          <div class="order-title">${o.item_title || 'Item'}</div>
+          <div class="order-items">${o.items_count} item(s)</div>
+          <div class="order-date">${o.date}</div>
+        </div>
 
-    function trackOrder(ev, orderId) {
-      ev.stopPropagation();
-      alert('Tracking info for order #' + orderId + ' (to be implemented)');
-    }
+        <div class="order-total">CA$ ${Number(o.total).toFixed(2)}</div>
+      </div>
+    `;
 
-    function payNow(ev, orderId) {
-      ev.stopPropagation();
-      alert('Redirect to payment for order #' + orderId + ' (to be implemented)');
-    }
+    list.appendChild(div);
+  });
+}
 
-    function goShopping() {
-      // 跳回首页
-      window.location.href = 'home.html';
-    }
+/* ========== 初始化 ========== */
+window.onload = () => loadOrdersFromAPI();
+</script>
 
-    // Tabs 切换
-    function setupTabs(orders) {
-      const tabs = document.querySelectorAll('.tab-item');
-      tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          tabs.forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-          const filter = tab.getAttribute('data-filter');
-          renderOrders(orders, filter);
-        });
-      });
-    }
-
-    // 初始化
-    (async function init() {
-      const orders = await loadOrdersFromAPI();
-      setupTabs(orders);
-      renderOrders(orders, 'all');
-    })();
-  </script>
 </body>
 </html>
