@@ -1,235 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>My Orders - B1ing</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Orders</title>
 
   <style>
     body {
-      margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial;
       background: #f7f7f7;
-      color: #222;
+      margin: 0;
+      padding: 0;
     }
-
-    /* 顶部导航栏 */
-    .nav-bar {
-      position: sticky;
-      top: 0;
-      z-index: 10;
+    .page-header {
       display: flex;
       align-items: center;
-      padding: 12px 16px;
-      background: #ffffff;
+      padding: 14px;
       font-size: 18px;
-      font-weight: 700;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      font-weight: 600;
+      background: white;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     }
-    .nav-back {
-      font-size: 22px;
+    .back-btn {
+      font-size: 20px;
       margin-right: 12px;
       cursor: pointer;
     }
-
-    /* 订单列表 */
-    #orders-list {
-      padding: 16px;
-    }
-
-    .order-card {
-      background: #fff;
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 14px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      cursor: pointer;
-    }
-
-    .order-header {
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-      margin-bottom: 12px;
-    }
-
-    .order-no {
-      font-weight: 700;
-    }
-
-    .order-status {
-      font-weight: 600;
-    }
-
-    .status-pending { color: #ff9500; }
-    .status-processing { color: #007aff; }
-    .status-completed { color: #34c759; }
-    .status-cancelled { color: #999; }
-
-    .order-body {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .order-thumb {
-      width: 70px;
-      height: 70px;
-      border-radius: 10px;
-      background: #f1f1f1;
-      object-fit: cover;
-      flex-shrink: 0;
-    }
-
-    .order-info {
-      flex: 1;
-    }
-
-    .order-title {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .order-meta {
-      font-size: 12px;
-      color: #777;
-    }
-
-    .order-total {
-      font-size: 16px;
-      font-weight: 700;
-      color: #ff5500;
-      margin-left: 8px;
-    }
-
-    .loading,
-    .empty,
-    .error {
+    .loading-box {
+      margin-top: 40px;
       text-align: center;
-      padding: 24px;
+      font-size: 16px;
       color: #666;
-      font-size: 14px;
-    }
-
-    .empty-icon {
-      font-size: 48px;
-      margin-bottom: 10px;
     }
   </style>
+
+  <script>
+    // 自动跳转到 WooCommerce 的 My Orders 页面
+    function goToOrders() {
+      window.location.href = "https://b1ing.ca/my-account/orders/";
+    }
+
+    // 页面加载后立即跳转
+    window.onload = function() {
+      goToOrders();
+    }
+  </script>
 </head>
 
 <body>
-
-  <!-- 顶部导航 -->
-  <div class="nav-bar">
-    <div class="nav-back" onclick="history.back()">‹</div>
+  <div class="page-header">
+    <span class="back-btn" onclick="history.back()">←</span>
     My Orders
   </div>
 
-  <div id="orders-list"></div>
-
-  <script>
-    const API_URL = "https://b1ing.ca/wp-json/b1ing/v1/orders";
-
-    /* ========== 获取订单 ========== */
-    async function loadOrdersFromAPI() {
-      const list = document.getElementById("orders-list");
-      list.innerHTML = `<div class="loading">Loading your orders...</div>`;
-
-      try {
-        const res = await fetch(API_URL, {
-          credentials: "include" // 关键，用于带 WordPress 登录 cookie
-        });
-
-        if (!res.ok) {
-          list.innerHTML = `<div class="error">Unable to load your orders (Error ${res.status}).</div>`;
-          return;
-        }
-
-        const orders = await res.json();
-        renderOrders(orders);
-
-      } catch (err) {
-        console.error(err);
-        list.innerHTML = `<div class="error">Network error. Please try again later.</div>`;
-      }
-    }
-
-    /* ========== 渲染订单列表 ========== */
-    function renderOrders(orders) {
-      const list = document.getElementById("orders-list");
-
-      if (!orders.length) {
-        list.innerHTML = `
-          <div class="empty">
-            <div class="empty-icon">📭</div>
-            You have no orders yet.
-          </div>
-        `;
-        return;
-      }
-
-      list.innerHTML = "";
-
-      orders.forEach(o => {
-        const div = document.createElement("div");
-        div.className = "order-card";
-        div.onclick = () => openOrderDetail(o.id);
-
-        div.innerHTML = `
-          <div class="order-header">
-            <span class="order-no">Order #${o.number}</span>
-            <span class="order-status ${statusClass(o.status)}">${statusLabel(o.status)}</span>
-          </div>
-
-          <div class="order-body">
-            <img class="order-thumb" src="${o.thumb || ''}" />
-
-            <div class="order-info">
-              <div class="order-title">${o.item_title || 'Item'}</div>
-              <div class="order-meta">${o.items_count} item(s) · ${o.date}</div>
-            </div>
-
-            <div class="order-total">CA$ ${Number(o.total).toFixed(2)}</div>
-          </div>
-        `;
-
-        list.appendChild(div);
-      });
-    }
-
-    /* ========== 状态文本 & 样式 ========== */
-    function statusLabel(s) {
-      switch (s) {
-        case "pending": return "Pending Payment";
-        case "processing": return "Processing";
-        case "completed": return "Completed";
-        case "cancelled": return "Cancelled";
-        default: return s;
-      }
-    }
-
-    function statusClass(s) {
-      switch (s) {
-        case "pending": return "status-pending";
-        case "processing": return "status-processing";
-        case "completed": return "status-completed";
-        case "cancelled": return "status-cancelled";
-        default: return "";
-      }
-    }
-
-    /* ========== 跳转订单详情（下一步可做） ========== */
-    function openOrderDetail(id) {
-      // 以后如果你做 order_detail.html：
-      // location.href = `order_detail.html?id=${id}`;
-      alert("You tapped order #" + id + ". Detail page coming soon.");
-    }
-
-    /* ========== 启动 ========== */
-    window.onload = () => loadOrdersFromAPI();
-  </script>
-
+  <div class="loading-box">
+    Loading your orders…  
+    <br><br>
+    If nothing happens, <a href="https://b1ing.ca/my-account/orders/">click here</a>.
+  </div>
 </body>
 </html>
