@@ -374,56 +374,27 @@
       </div>
     </div>
 
-    <!-- Orders & After-sales -->
+    <!-- Account Center (Merged Block) -->
     <div class="section-block">
       <div class="section-header">
-        <span>Orders & After-sales</span>
-        <span>View all &gt;</span>
+        <span>Account Center</span>
+        <span>Manage everything</span>
       </div>
+
       <div class="menu-list">
-        <div class="menu-item" onclick="location.href='my_orders.html'">
+        <!-- My Orders：直接跳 WooCommerce 我的订单页面 -->
+        <div class="menu-item" onclick="window.location.href='https://b1ing.ca/my-account/orders/'">
           <div class="menu-left">
             <div class="menu-icon">📦</div>
             <div class="menu-title">My Orders</div>
           </div>
           <div class="menu-right">
-            <span class="badge">New</span>
             <span>All statuses</span>
             <span>›</span>
           </div>
         </div>
 
-        <div class="menu-item" onclick="openSection('address')">
-          <div class="menu-left">
-            <div class="menu-icon">🏠</div>
-            <div class="menu-title">Shipping Address</div>
-          </div>
-          <div class="menu-right">
-            <span>Manage</span>
-            <span>›</span>
-          </div>
-        </div>
-
-        <div class="menu-item" onclick="openSection('coupons')">
-          <div class="menu-left">
-            <div class="menu-icon">🎟️</div>
-            <div class="menu-title">Coupons</div>
-          </div>
-          <div class="menu-right">
-            <span id="coupon-count">0 available</span>
-            <span>›</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Favorites / Cart / Recently viewed -->
-    <div class="section-block">
-      <div class="section-header">
-        <span>Shortcuts</span>
-        <span>Personalized</span>
-      </div>
-      <div class="menu-list">
+        <!-- My Favorites：以后接你自己的 favorites 页面 -->
         <div class="menu-item" onclick="openSection('favorites')">
           <div class="menu-left">
             <div class="menu-icon">❤️</div>
@@ -435,71 +406,20 @@
           </div>
         </div>
 
-        <div class="menu-item" onclick="openSection('cart')">
+        <!-- Shipping Address：直接跳 WooCommerce 地址管理 -->
+        <div class="menu-item" onclick="window.location.href='https://b1ing.ca/my-account/edit-address/'">
           <div class="menu-left">
-            <div class="menu-icon">🛒</div>
-            <div class="menu-title">My Cart</div>
+            <div class="menu-icon">🏠</div>
+            <div class="menu-title">Shipping Address</div>
           </div>
           <div class="menu-right">
-            <span>Check out</span>
-            <span>›</span>
-          </div>
-        </div>
-
-        <div class="menu-item" onclick="openSection('history')">
-          <div class="menu-left">
-            <div class="menu-icon">👀</div>
-            <div class="menu-title">Recently Viewed</div>
-          </div>
-          <div class="menu-right">
-            <span>Browse again</span>
+            <span>Manage</span>
             <span>›</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Settings & Sign out -->
-    <div class="section-block">
-      <div class="section-header">
-        <span>Settings & Help</span>
-        <span></span>
-      </div>
-      <div class="menu-list">
-        <div class="menu-item" onclick="openSection('profile')">
-          <div class="menu-left">
-            <div class="menu-icon">👤</div>
-            <div class="menu-title">Profile & Preferences</div>
-          </div>
-          <div class="menu-right">
-            <span>Edit</span>
-            <span>›</span>
-          </div>
-        </div>
-
-        <div class="menu-item" onclick="openSection('support')">
-          <div class="menu-left">
-            <div class="menu-icon">💬</div>
-            <div class="menu-title">Customer Support</div>
-          </div>
-          <div class="menu-right">
-            <span>Chat now</span>
-            <span>›</span>
-          </div>
-        </div>
-
-        <div class="menu-item" onclick="handleSignOut()">
-          <div class="menu-left">
-            <div class="menu-icon">🚪</div>
-            <div class="menu-title">Sign out</div>
-          </div>
-          <div class="menu-right">
-            <span>Current device</span>
-            <span>›</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <div class="bottom-safe"></div>
   </div>
@@ -559,6 +479,13 @@
   }
 
   function openSection(key) {
+  if (key === "favorites") {
+    window.location.href = "favorites.html"; // 以后接入真正收藏页
+  } else {
+    alert("Open section: " + key);
+  }
+}
+
     // 这里先用 alert，占位，后面你可以换成实际页面跳转
     if (key === "favorites") {
       window.location.href = "favorites.html"; // TODO: 你自己的收藏页面
