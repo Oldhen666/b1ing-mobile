@@ -3,147 +3,144 @@
 <head>
   <meta charset="UTF-8" />
   <title>My Account – B1ing</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root {
-      --page-bg: #ffb642;
+      --bg-main: #ffb63b;
       --card-bg: #ffffff;
-      --text-main: #222;
-      --text-sub: #666;
-      --accent: #ff6d00;
-      --divider: #f0f0f0;
-      --radius-card: 18px;
-      --shadow-card: 0 6px 14px rgba(0, 0, 0, 0.16);
+      --text-main: #333333;
+      --text-sub: #777777;
+      --accent: #ff6b00;
+      --divider: #f1f1f1;
+      --danger: #c0392b;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --shadow-card: 0 4px 14px rgba(0,0,0,0.12);
     }
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Segoe UI", Roboto, Arial, "PingFang SC", "Noto Sans CJK SC",
-        sans-serif;
-      background: var(--page-bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: var(--bg-main);
       color: var(--text-main);
     }
 
     .page {
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 24px 16px 42px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    .page-title {
-      font-size: 24px;
+    /* 顶部标题 */
+    .page-header {
+      padding: 18px 16px 4px;
+      font-size: 22px;
       font-weight: 800;
       color: #fff;
-      margin-bottom: 14px;
     }
 
-    /* 顶部用户卡片 */
+    /* 页面主体 */
+    .page-body {
+      flex: 1;
+      padding: 8px 16px 20px;
+    }
+
+    /* 顶部账户卡片 */
     .card {
       background: var(--card-bg);
-      border-radius: var(--radius-card);
+      border-radius: var(--radius-lg);
       box-shadow: var(--shadow-card);
-      padding: 16px 16px 14px;
+      padding: 16px 18px;
       margin-bottom: 14px;
     }
 
     .card-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
       margin-bottom: 10px;
     }
 
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
     .avatar {
-      width: 44px;
-      height: 44px;
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
-      background: #ffe1b2;
+      background: #ffe0b2;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       font-size: 22px;
       font-weight: 700;
-      color: #d57700;
+      color: var(--accent);
+      margin-right: 12px;
     }
 
-    .user-main-name {
-      font-size: 18px;
+    .user-main {
+      flex: 1;
+    }
+
+    .user-name {
+      font-size: 17px;
       font-weight: 700;
+      margin-bottom: 2px;
     }
 
-    .user-sub {
+    .user-desc {
       font-size: 13px;
       color: var(--text-sub);
-      margin-top: 2px;
     }
 
-    .signin-state {
-      font-size: 13px;
-      color: #d9534f;
+    .user-status {
+      font-size: 12px;
+      color: var(--accent);
       font-weight: 600;
+      white-space: nowrap;
     }
 
-    .user-badges {
+    .user-tags {
+      margin-top: 10px;
       display: flex;
-      gap: 6px;
-      margin-top: 8px;
-      font-size: 11px;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
-    .badge {
+    .tag {
       padding: 3px 8px;
       border-radius: 999px;
-      background: #fff4dd;
-      color: #c87b00;
-      border: 0.5px solid #ffd395;
-      font-weight: 600;
+      font-size: 11px;
+      border: 1px solid #ffe0b2;
+      color: #aa6b00;
+      background: #fff7e0;
     }
 
-    .badge.secondary {
-      background: #eef5ff;
-      color: #3466c4;
-      border-color: #c4d7ff;
-    }
-
-    .stats-row {
+    .user-stats {
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
+      margin-top: 12px;
+      border-top: 1px solid var(--divider);
       padding-top: 10px;
-      border-top: 1px solid #f3f3f3;
+      text-align: center;
     }
 
-    .stat-block {
-      text-align: center;
-      min-width: 70px;
+    .stat-item {
+      flex: 1;
     }
 
     .stat-label {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-sub);
+      margin-bottom: 4px;
     }
 
     .stat-value {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
-      margin-top: 3px;
     }
 
     /* 登录卡片 */
     .login-title {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 700;
       margin-bottom: 6px;
     }
@@ -151,8 +148,7 @@
     .login-subtitle {
       font-size: 12px;
       color: var(--text-sub);
-      margin-bottom: 10px;
-      line-height: 1.4;
+      margin-bottom: 12px;
     }
 
     .social-buttons {
@@ -162,274 +158,239 @@
     }
 
     .social-btn {
-      border-radius: 999px;
-      border: none;
-      outline: none;
-      height: 42px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      border-radius: 999px;
+      height: 42px;
       font-size: 14px;
       font-weight: 600;
+      border: none;
       cursor: pointer;
       text-decoration: none;
-    }
-
-    .social-btn.google {
-      background: #ffffff;
-      border: 1px solid #e4e4e4;
-      color: #444;
-    }
-
-    .social-btn.google-icon {
-      width: 18px;
-      height: 18px;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
 
     .social-btn:active {
       transform: scale(0.97);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
 
-    /* Orders & Account 卡片 */
-    .section-title-row {
-      display: flex;
-      justify-content: space-between;
+    .social-btn.google {
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      color: #202124;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.10);
+    }
+
+    .social-icon {
+      margin-right: 8px;
+      display: inline-flex;
       align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    /* 中间 Orders & Account 区块 */
+    .section-title {
       font-size: 13px;
-      color: var(--text-sub);
-      margin-bottom: 6px;
-    }
-
-    .section-title-row span:first-child {
-      font-size: 14px;
       font-weight: 700;
-      color: var(--text-main);
+      color: var(--text-sub);
+      margin-bottom: 4px;
     }
 
-    .list {
-      margin-top: 2px;
-    }
-
-    .list-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 0;
-      cursor: pointer;
-    }
-
-    .list-item + .list-item {
+    .menu-list {
+      margin-top: 6px;
       border-top: 1px solid var(--divider);
     }
 
-    .list-left {
+    .menu-item {
       display: flex;
       align-items: center;
-      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--divider);
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
     }
 
-    .list-icon {
-      width: 26px;
-      height: 26px;
-      border-radius: 8px;
-      background: #fff5e9;
+    .menu-icon {
+      width: 32px;
+      height: 32px;
+      margin-right: 12px;
+      border-radius: 9px;
+      background: #fff7e0;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 18px;
     }
 
-    .list-label-main {
+    .menu-main {
+      flex: 1;
+    }
+
+    .menu-title {
       font-size: 14px;
       font-weight: 600;
+      margin-bottom: 2px;
     }
 
-    .list-label-sub {
+    .menu-desc {
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .menu-extra {
+      font-size: 12px;
+      color: var(--text-sub);
+      white-space: nowrap;
+    }
+
+    /* 底部 Sign out */
+    .logout-card {
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    .logout-btn {
+      width: 100%;
+      text-align: center;
+      padding: 12px 0;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(0,0,0,0.08);
+      background: #fff;
+      color: var(--danger);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: default; /* 说明性按钮，不真正退出 */
+    }
+
+    .logout-tip {
+      margin-top: 6px;
       font-size: 11px;
       color: var(--text-sub);
-      margin-top: 2px;
-    }
-
-    .list-right {
-      font-size: 12px;
-      color: var(--text-sub);
-    }
-
-    /* Sign out 卡片 */
-    .logout-text {
-      font-size: 12px;
-      color: var(--text-sub);
-      margin-top: 6px;
-    }
-
-    .logout-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .logout-icon {
-      width: 26px;
-      height: 26px;
-      border-radius: 8px;
-      background: #ffe8e5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      color: #d9534f;
+      text-align: center;
     }
   </style>
 </head>
-
 <body>
-  <div class="page">
-    <div class="page-title">My Account</div>
+<div class="page">
+  <div class="page-header">My Account</div>
 
-    <!-- 顶部用户卡 -->
+  <div class="page-body">
+
+    <!-- 顶部账户卡片 -->
     <div class="card">
       <div class="card-header">
-        <div class="user-info">
-          <div class="avatar">G</div>
-          <div>
-            <div class="user-main-name">Guest</div>
-            <div class="user-sub">Sign in to sync your orders</div>
-          </div>
+        <div class="avatar">G</div>
+        <div class="user-main">
+          <div class="user-name">Guest</div>
+          <div class="user-desc">Sign in to sync your orders</div>
         </div>
-        <div class="signin-state" id="signin-state">Not signed in</div>
+        <div class="user-status">Not signed in</div>
       </div>
 
-      <div class="user-badges">
-        <div class="badge">Member</div>
-        <div class="badge secondary">Mobile App</div>
+      <div class="user-tags">
+        <span class="tag">Member</span>
+        <span class="tag">Mobile App</span>
       </div>
 
-      <div class="stats-row">
-        <div class="stat-block">
+      <div class="user-stats">
+        <div class="stat-item">
           <div class="stat-label">Orders</div>
           <div class="stat-value">0</div>
         </div>
-        <div class="stat-block">
+        <div class="stat-item">
           <div class="stat-label">Favorites</div>
           <div class="stat-value">0</div>
         </div>
-        <div class="stat-block">
+        <div class="stat-item">
           <div class="stat-label">Coupons</div>
           <div class="stat-value">0</div>
         </div>
       </div>
     </div>
 
-    <!-- 登录 / 三方账号 -->
-    <div class="card">
+    <!-- 登录卡片：Google 显示，Facebook 按钮隐藏（以后可以放开） -->
+    <div class="card" id="login-panel">
       <div class="login-title">Sign in or create your B1ing account</div>
       <div class="login-subtitle">
-        Use Google to quickly sign in and sync your orders &amp; favorites.
+        Use Google (or later Facebook) to quickly sign in and sync your orders &amp; favorites.
       </div>
 
       <div class="social-buttons">
-        <!-- Google 登录：直接跳转到 Nextend Social Login -->
+        <!-- Google 直接跳转到 Nextend Social Login -->
         <a
           class="social-btn google"
-          id="google-login-btn"
-          href="https://b1ing.ca/wp-login.php?loginSocial=google&redirect_to=https%3A%2F%2Foldhen666.github.io%2Fb1ing-mobile%2Fmy_account.html"
+          href="https://b1ing.ca/wp-login.php?loginSocial=google&redirect_to=https%3A%2F%2Fb1ing.ca%2Fmy-account%2F"
         >
-          <!-- 这里可以换成真正的 G 图标图片 -->
-          <span class="google-icon">G</span>
+          <span class="social-icon">G</span>
           <span>Continue with Google</span>
         </a>
 
+        <!-- Facebook 登录保留但隐藏（以后要用可以打开） -->
         <!--
-        将下面这段解除注释即可启用 Facebook 登录：
-        <button
+        <a
           class="social-btn facebook"
-          onclick="window.location.href='https://b1ing.ca/wp-login.php?loginSocial=facebook&redirect_to=https%3A%2F%2Foldhen666.github.io%2Fb1ing-mobile%2Fmy_account.html';"
+          href="https://b1ing.ca/wp-login.php?loginSocial=facebook&redirect_to=https%3A%2F%2Fb1ing.ca%2Fmy-account%2F"
         >
-          <span class="facebook-icon">📘</span>
+          <span class="social-icon">📘</span>
           <span>Continue with Facebook</span>
-        </button>
+        </a>
         -->
       </div>
     </div>
 
-    <!-- Orders & Account 合并区块 -->
+    <!-- Orders + Favorites + Address 合并区块 -->
     <div class="card">
-      <div class="section-title-row">
-        <span>Orders &amp; Account</span>
-        <span></span>
-      </div>
+      <div class="section-title">Orders &amp; Account</div>
 
-      <div class="list">
-        <!-- My Orders -->
-        <div
-          class="list-item"
-          onclick="window.location.href='https://b1ing.ca/my-account/orders/';"
-        >
-          <div class="list-left">
-            <div class="list-icon">📦</div>
-            <div>
-              <div class="list-label-main">My Orders</div>
-              <div class="list-label-sub">View and manage all your orders</div>
-            </div>
+      <div class="menu-list">
+        <!-- My Orders：直接跳 Woo 自带订单页 -->
+        <a class="menu-item" href="https://b1ing.ca/my-account/orders/">
+          <div class="menu-icon">📦</div>
+          <div class="menu-main">
+            <div class="menu-title">My Orders</div>
+            <div class="menu-desc">View and manage all your orders</div>
           </div>
-          <div class="list-right">All statuses ›</div>
-        </div>
+          <div class="menu-extra">All statuses ›</div>
+        </a>
 
-        <!-- My Favorites -->
-        <div
-          class="list-item"
-          onclick="window.location.href='my_favorites.html';"
-        >
-          <div class="list-left">
-            <div class="list-icon">❤️</div>
-            <div>
-              <div class="list-label-main">My Favorites</div>
-              <div class="list-label-sub">All saved items</div>
-            </div>
+        <!-- My Favorites：本地收藏页 or 以后接 Woo API -->
+        <a class="menu-item" href="my_favorites.html">
+          <div class="menu-icon">❤️</div>
+          <div class="menu-main">
+            <div class="menu-title">My Favorites</div>
+            <div class="menu-desc">All saved items</div>
           </div>
-          <div class="list-right">Browse ›</div>
-        </div>
+          <div class="menu-extra">Browse ›</div>
+        </a>
 
-        <!-- My Address -->
-        <div
-          class="list-item"
-          onclick="window.location.href='https://b1ing.ca/my-account/edit-address/';"
-        >
-          <div class="list-left">
-            <div class="list-icon">🏠</div>
-            <div>
-              <div class="list-label-main">My Address</div>
-              <div class="list-label-sub">Manage your shipping address</div>
-            </div>
+        <!-- My Address：直接跳 Woo 的地址编辑页面 -->
+        <a class="menu-item" href="https://b1ing.ca/my-account/edit-address/">
+          <div class="menu-icon">🏠</div>
+          <div class="menu-main">
+            <div class="menu-title">My Address</div>
+            <div class="menu-desc">Manage your shipping address</div>
           </div>
-          <div class="list-right">Edit ›</div>
-        </div>
+          <div class="menu-extra">Edit ›</div>
+        </a>
       </div>
     </div>
 
-    <!-- Sign out -->
-    <div class="card">
-      <div
-        class="logout-row"
-        onclick="window.location.href='https://b1ing.ca/my-account/customer-logout/?redirect_to=https%3A%2F%2Foldhen666.github.io%2Fb1ing-mobile%2Fmy_account.html';"
-      >
-        <div class="logout-icon">⇦</div>
-        <div>Sign out</div>
-      </div>
-      <div class="logout-text">
-        You will be signed out from this device only.
+    <!-- Sign out 提示卡片 -->
+    <div class="card logout-card">
+      <div class="logout-btn">Sign out</div>
+      <div class="logout-tip">
+        You will be signed out from this device only.  
+        To fully logout, please use the account page on B1ing.ca.
       </div>
     </div>
+
   </div>
+</div>
 
-  <script>
-    // 这里暂时不做登录状态检测，避免第三方 Cookie 限制带来的问题。
-    // 后面如果你真的需要在顶部显示真实用户名，我们再单独加一段
-    // 调用 https://b1ing.ca/wp-json/wp/v2/users/me 的逻辑。
-  </script>
+<!-- ⚠️ 重要：不再有任何 Google JS / fetch / wp-json 调用 -->
 </body>
 </html>
