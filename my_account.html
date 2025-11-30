@@ -486,15 +486,6 @@
   }
 }
 
-    // 这里先用 alert，占位，后面你可以换成实际页面跳转
-    if (key === "favorites") {
-      window.location.href = "favorites.html"; // TODO: 你自己的收藏页面
-    } else if (key === "cart") {
-      window.location.href = "cart.html"; // TODO: 你的购物车页面
-    } else {
-      alert("Open section: " + key + " (you can hook this to real pages)");
-    }
-  }
 
   function handleSignOut() {
     if (!localStorage.getItem("user_name") && !localStorage.getItem("user_email")) {
